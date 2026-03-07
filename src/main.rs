@@ -3,6 +3,7 @@ use std::path::Path;
 use anyhow::{bail, Result};
 use clap::Parser;
 
+mod app;
 mod cli;
 mod markdown;
 mod slide;
