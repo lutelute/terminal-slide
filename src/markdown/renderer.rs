@@ -83,8 +83,10 @@ impl<'a> SlideWidget<'a> {
                 }
                 SlideElement::BulletList(items) => {
                     for item in items {
-                        let mut spans: Vec<Span<'static>> =
-                            vec![Span::styled("  \u{2022} ", Style::default().fg(Color::Cyan))];
+                        let mut spans: Vec<Span<'static>> = vec![Span::styled(
+                            "  \u{2022} ",
+                            Style::default().fg(Color::Cyan),
+                        )];
                         spans.extend(item.iter().map(styled_span_to_ratatui));
                         lines.push(Line::from(spans));
                     }
@@ -127,12 +129,7 @@ impl<'a> SlideWidget<'a> {
     ///
     /// Falls back to plain text rendering if the language is not recognized
     /// or if syntax highlighting fails for any line.
-    fn highlight_code(
-        &self,
-        lang: Option<&str>,
-        code: &str,
-        width: usize,
-    ) -> Vec<Line<'static>> {
+    fn highlight_code(&self, lang: Option<&str>, code: &str, width: usize) -> Vec<Line<'static>> {
         let syntax = lang
             .and_then(|l| self.highlighter.syntax_set.find_syntax_by_token(l))
             .unwrap_or_else(|| self.highlighter.syntax_set.find_syntax_plain_text());
@@ -189,8 +186,7 @@ impl<'a> SlideWidget<'a> {
                     if text.is_empty() {
                         continue;
                     }
-                    let fg =
-                        Color::Rgb(style.foreground.r, style.foreground.g, style.foreground.b);
+                    let fg = Color::Rgb(style.foreground.r, style.foreground.g, style.foreground.b);
                     line_len += text.len();
                     spans.push(Span::styled(
                         text.to_string(),

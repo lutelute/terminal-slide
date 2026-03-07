@@ -52,9 +52,9 @@ impl TransitionManager {
                 (300u32, Interpolation::CubicOut),
             )),
             // Jump navigation: content materializes with a dissolve-style effect
-            Action::FirstSlide | Action::LastSlide => Some(fx::coalesce(
-                (200u32, Interpolation::CubicOut),
-            )),
+            Action::FirstSlide | Action::LastSlide => {
+                Some(fx::coalesce((200u32, Interpolation::CubicOut)))
+            }
             _ => None,
         };
 

@@ -112,10 +112,7 @@ mod tests {
 
     #[test]
     fn test_next_slide_actions() {
-        assert_eq!(
-            map_key_event(key_press(KeyCode::Right)),
-            Action::NextSlide
-        );
+        assert_eq!(map_key_event(key_press(KeyCode::Right)), Action::NextSlide);
         assert_eq!(
             map_key_event(key_press(KeyCode::Char('l'))),
             Action::NextSlide
@@ -136,10 +133,7 @@ mod tests {
 
     #[test]
     fn test_prev_slide_actions() {
-        assert_eq!(
-            map_key_event(key_press(KeyCode::Left)),
-            Action::PrevSlide
-        );
+        assert_eq!(map_key_event(key_press(KeyCode::Left)), Action::PrevSlide);
         assert_eq!(
             map_key_event(key_press(KeyCode::Char('h'))),
             Action::PrevSlide
@@ -168,14 +162,8 @@ mod tests {
 
     #[test]
     fn test_unmapped_keys_return_none() {
-        assert_eq!(
-            map_key_event(key_press(KeyCode::Char('x'))),
-            Action::None
-        );
-        assert_eq!(
-            map_key_event(key_press(KeyCode::Char('z'))),
-            Action::None
-        );
+        assert_eq!(map_key_event(key_press(KeyCode::Char('x'))), Action::None);
+        assert_eq!(map_key_event(key_press(KeyCode::Char('z'))), Action::None);
         assert_eq!(map_key_event(key_press(KeyCode::Tab)), Action::None);
         assert_eq!(map_key_event(key_press(KeyCode::Enter)), Action::None);
     }

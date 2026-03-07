@@ -67,7 +67,8 @@ pub enum SlideElement {
     NumberedList(Vec<Vec<StyledSpan>>),
     /// A horizontal rule separator.
     HorizontalRule,
-    /// A blank line for spacing.
+    /// A blank line for spacing (reserved for future use).
+    #[allow(dead_code)]
     BlankLine,
 }
 
@@ -75,6 +76,7 @@ pub enum SlideElement {
 #[derive(Debug, Clone)]
 pub struct Slide {
     /// The raw markdown content of this slide (before parsing).
+    #[allow(dead_code)]
     pub raw_content: String,
     /// The parsed elements that make up this slide.
     pub elements: Vec<SlideElement>,
@@ -109,6 +111,7 @@ pub struct Presentation {
     /// The slides in this presentation, in order.
     pub slides: Vec<Slide>,
     /// An optional title for the presentation (extracted from the first H1 heading).
+    #[allow(dead_code)]
     pub title: Option<String>,
 }
 
@@ -129,6 +132,7 @@ impl Presentation {
     }
 
     /// Returns true if the presentation has no slides.
+    #[allow(dead_code)]
     pub fn is_empty(&self) -> bool {
         self.slides.is_empty()
     }
@@ -221,10 +225,7 @@ mod tests {
     fn test_slide_elements_variants() {
         let elements = vec![
             SlideElement::Heading(1, "Title".to_string()),
-            SlideElement::Paragraph(vec![
-                StyledSpan::plain("Hello "),
-                StyledSpan::bold("world"),
-            ]),
+            SlideElement::Paragraph(vec![StyledSpan::plain("Hello "), StyledSpan::bold("world")]),
             SlideElement::CodeBlock(Some("rust".to_string()), "fn main() {}".to_string()),
             SlideElement::BulletList(vec![
                 vec![StyledSpan::plain("Item 1")],

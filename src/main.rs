@@ -17,8 +17,8 @@ mod slide;
 mod tui;
 
 use app::App;
-use cli::{Cli, PresentationFormat, detect_format};
-use markdown::{SlideWidget, SyntaxHighlighter, parse_presentation};
+use cli::{detect_format, Cli, PresentationFormat};
+use markdown::{parse_presentation, SlideWidget, SyntaxHighlighter};
 
 fn main() -> Result<()> {
     let args = Cli::parse();
@@ -50,8 +50,9 @@ fn main() -> Result<()> {
 /// the main rendering/event loop until the user quits.
 fn run_markdown_presentation(file_path: &str) -> Result<()> {
     // 1. Read file content (with user-friendly error for binary/corrupted files)
-    let content = fs::read_to_string(file_path)
-        .with_context(|| format!("Failed to read '{}' (is it a binary or corrupted file?)", file_path))?;
+    let content = fs::read_to_string(file_path).with_context(|| {
+        format!("Failed to read '{file_path}' (is it a binary or corrupted file?)")
+    })?;
 
     // 2. Parse into Presentation via markdown::parser
     let presentation = parse_presentation(&content);
@@ -92,11 +93,7 @@ fn run_markdown_presentation(file_path: &str) -> Result<()> {
             }
 
             // Layout::vertical split for [main content area, footer bar]
-            let chunks = Layout::vertical([
-                Constraint::Min(1),
-                Constraint::Length(1),
-            ])
-            .split(area);
+            let chunks = Layout::vertical([Constraint::Min(1), Constraint::Length(1)]).split(area);
 
             let main_area = chunks[0];
             let footer_area = chunks[1];
@@ -119,16 +116,18 @@ fn run_markdown_presentation(file_path: &str) -> Result<()> {
             // Hide for single-slide presentations since navigation is disabled
             if app.is_single_slide() {
                 // Show a subtle help hint instead of navigation indicator
-                let hint = Paragraph::new(Line::from(vec![
-                    Span::styled("  q to quit  ", Style::default().fg(Color::DarkGray)),
-                ]))
+                let hint = Paragraph::new(Line::from(vec![Span::styled(
+                    "  q to quit  ",
+                    Style::default().fg(Color::DarkGray),
+                )]))
                 .alignment(Alignment::Right);
                 frame.render_widget(hint, footer_area);
             } else {
                 let progress = format!("  {}  ", app.progress_text());
-                let footer = Paragraph::new(Line::from(vec![
-                    Span::styled(progress, Style::default().fg(Color::DarkGray)),
-                ]))
+                let footer = Paragraph::new(Line::from(vec![Span::styled(
+                    progress,
+                    Style::default().fg(Color::DarkGray),
+                )]))
                 .alignment(Alignment::Right);
                 frame.render_widget(footer, footer_area);
             }

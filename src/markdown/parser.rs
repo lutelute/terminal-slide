@@ -278,7 +278,8 @@ mod tests {
 
     #[test]
     fn test_split_slides() {
-        let content = "# Slide 1\n\nContent\n\n---\n\n# Slide 2\n\nMore content\n\n---\n\n# Slide 3";
+        let content =
+            "# Slide 1\n\nContent\n\n---\n\n# Slide 2\n\nMore content\n\n---\n\n# Slide 3";
         let slides = split_slides(content);
         assert_eq!(slides.len(), 3);
         assert!(slides[0].contains("Slide 1"));

@@ -30,15 +30,15 @@ pub fn serve_html(file_path: &Path, port: u16) -> Result<()> {
     // Try binding to the requested port, falling back to port+1..port+10
     let (server, actual_port) = try_bind_server(port)?;
 
-    let url = format!("http://localhost:{}", actual_port);
+    let url = format!("http://localhost:{actual_port}");
 
     println!("Serving: {}", file_path.display());
-    println!("Server running at: {}", url);
+    println!("Server running at: {url}");
     println!("Press Ctrl+C to stop");
 
     // Open the default browser
     if let Err(e) = open::that(&url) {
-        eprintln!("Warning: Could not open browser: {}", e);
+        eprintln!("Warning: Could not open browser: {e}");
     }
 
     // Handle incoming requests until the process is terminated
@@ -58,25 +58,17 @@ fn try_bind_server(port: u16) -> Result<(Server, u16)> {
             None => break,
         };
 
-        let addr = format!("127.0.0.1:{}", try_port);
+        let addr = format!("127.0.0.1:{try_port}");
         match Server::http(&addr) {
             Ok(server) => {
                 if offset > 0 {
-                    eprintln!(
-                        "Port {} is in use, using port {} instead",
-                        port, try_port
-                    );
+                    eprintln!("Port {port} is in use, using port {try_port} instead");
                 }
                 return Ok((server, try_port));
             }
             Err(_) if offset < 10 => continue,
             Err(e) => {
-                bail!(
-                    "Could not bind to any port in range {}-{}: {}",
-                    port,
-                    try_port,
-                    e
-                );
+                bail!("Could not bind to any port in range {port}-{try_port}: {e}");
             }
         }
     }

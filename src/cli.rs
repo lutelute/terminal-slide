@@ -38,10 +38,7 @@ pub fn detect_format(path: &str) -> Result<PresentationFormat> {
     match extension.as_deref() {
         Some("md") => Ok(PresentationFormat::Markdown),
         Some("html") | Some("htm") => Ok(PresentationFormat::Html),
-        Some(ext) => bail!(
-            "Unsupported file format: .{}\nSupported formats: .md, .html, .htm",
-            ext
-        ),
+        Some(ext) => bail!("Unsupported file format: .{ext}\nSupported formats: .md, .html, .htm"),
         None => bail!("File has no extension.\nSupported formats: .md, .html, .htm"),
     }
 }
