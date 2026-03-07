@@ -1,5 +1,6 @@
 use std::fs;
 use std::path::Path;
+use std::time::Instant;
 
 use anyhow::{bail, Result};
 use clap::Parser;
@@ -65,8 +66,18 @@ fn run_markdown_presentation(file_path: &str) -> Result<()> {
     tui::install_panic_hook();
     let mut terminal = tui::init()?;
 
+    // Create transition manager for slide animations
+    let mut transition_manager = tui::TransitionManager::new();
+
+    // Track elapsed time between frames for animation timing
+    let mut last_frame_time = Instant::now();
+
     // 5. Enter main loop
     loop {
+        // Calculate elapsed time since last frame for animation processing
+        let elapsed = last_frame_time.elapsed();
+        last_frame_time = Instant::now();
+
         // Draw current slide via SlideWidget + render progress indicator
         terminal.draw(|frame| {
             let area = frame.area();
@@ -111,11 +122,20 @@ fn run_markdown_presentation(file_path: &str) -> Result<()> {
             ]))
             .alignment(Alignment::Right);
             frame.render_widget(footer, footer_area);
+
+            // Apply transition effects AFTER widget rendering
+            transition_manager.process(elapsed, frame.buffer_mut(), main_area);
         })?;
 
         // 6. Poll events and dispatch actions to App
+        let prev_index = app.current_slide_index;
         let action = tui::poll_event()?;
         app.handle_action(action);
+
+        // Trigger transition effect when slide index actually changes
+        if app.current_slide_index != prev_index {
+            transition_manager.trigger(action);
+        }
 
         // 7. Break on Quit
         if app.should_quit {
