@@ -11,6 +11,7 @@ use ratatui::widgets::Paragraph;
 
 mod app;
 mod cli;
+mod html;
 mod markdown;
 mod slide;
 mod tui;
@@ -34,11 +35,7 @@ fn main() -> Result<()> {
             run_markdown_presentation(&args.file)?;
         }
         PresentationFormat::Html => {
-            println!(
-                "Serving HTML slides: {} on port {}",
-                args.file, args.port
-            );
-            // TODO: Launch HTTP server and open browser
+            html::serve_html(path, args.port)?;
         }
     }
 
