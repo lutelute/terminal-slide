@@ -51,6 +51,14 @@ impl App {
         }
     }
 
+    /// Returns the progress indicator text (e.g., "3 / 12").
+    ///
+    /// Displays the 1-based current slide number and total count, suitable
+    /// for rendering in the footer area of the TUI.
+    pub fn progress_text(&self) -> String {
+        format!("{} / {}", self.current_slide_index + 1, self.total_slides)
+    }
+
     /// Handle an [`Action`] by dispatching to the appropriate navigation method.
     ///
     /// Returns the action that was handled, which callers can use to trigger
@@ -258,6 +266,23 @@ mod tests {
 
         app.last_slide();
         assert_eq!(app.current_slide_index, 0);
+    }
+
+    #[test]
+    fn test_progress_text() {
+        let app = App::new(5);
+        assert_eq!(app.progress_text(), "1 / 5");
+
+        let mut app = App::new(12);
+        app.current_slide_index = 2;
+        assert_eq!(app.progress_text(), "3 / 12");
+
+        let app = App::new(1);
+        assert_eq!(app.progress_text(), "1 / 1");
+
+        // Edge case: zero slides
+        let app = App::new(0);
+        assert_eq!(app.progress_text(), "1 / 0");
     }
 
     #[test]

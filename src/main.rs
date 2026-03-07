@@ -1,7 +1,12 @@
+use std::fs;
 use std::path::Path;
 
 use anyhow::{bail, Result};
 use clap::Parser;
+use ratatui::layout::{Alignment, Constraint, Layout};
+use ratatui::style::{Color, Style};
+use ratatui::text::{Line, Span};
+use ratatui::widgets::Paragraph;
 
 mod app;
 mod cli;
@@ -9,7 +14,9 @@ mod markdown;
 mod slide;
 mod tui;
 
+use app::App;
 use cli::{Cli, PresentationFormat, detect_format};
+use markdown::{SlideWidget, SyntaxHighlighter, parse_presentation};
 
 fn main() -> Result<()> {
     let args = Cli::parse();
@@ -23,8 +30,7 @@ fn main() -> Result<()> {
 
     match format {
         PresentationFormat::Markdown => {
-            println!("Presenting markdown slides: {}", args.file);
-            // TODO: Parse markdown and launch TUI presentation
+            run_markdown_presentation(&args.file)?;
         }
         PresentationFormat::Html => {
             println!(
@@ -34,6 +40,91 @@ fn main() -> Result<()> {
             // TODO: Launch HTTP server and open browser
         }
     }
+
+    Ok(())
+}
+
+/// Runs an interactive markdown slide presentation in the terminal.
+///
+/// Reads the file, parses it into slides, initializes the TUI, and enters
+/// the main rendering/event loop until the user quits.
+fn run_markdown_presentation(file_path: &str) -> Result<()> {
+    // 1. Read file content
+    let content = fs::read_to_string(file_path)?;
+
+    // 2. Parse into Presentation via markdown::parser
+    let presentation = parse_presentation(&content);
+
+    // 3. Create App with slide count
+    let mut app = App::new(presentation.slide_count());
+
+    // Create syntax highlighter (expensive — create once at startup)
+    let highlighter = SyntaxHighlighter::new();
+
+    // 4. Init terminal with panic hook
+    tui::install_panic_hook();
+    let mut terminal = tui::init()?;
+
+    // 5. Enter main loop
+    loop {
+        // Draw current slide via SlideWidget + render progress indicator
+        terminal.draw(|frame| {
+            let area = frame.area();
+
+            // Edge case: terminal too small shows warning message
+            if area.width < 40 || area.height < 10 {
+                let warning = Paragraph::new("Terminal too small (minimum 40x10)")
+                    .style(Style::default().fg(Color::Red))
+                    .alignment(Alignment::Center);
+                frame.render_widget(warning, area);
+                return;
+            }
+
+            // Layout::vertical split for [main content area, footer bar]
+            let chunks = Layout::vertical([
+                Constraint::Min(1),
+                Constraint::Length(1),
+            ])
+            .split(area);
+
+            let main_area = chunks[0];
+            let footer_area = chunks[1];
+
+            // Render current slide
+            if let Some(current_slide) = presentation.get_slide(app.current_slide_index) {
+                if current_slide.is_empty() {
+                    // Edge case: empty file shows 'No slides found'
+                    let msg = Paragraph::new("No slides found")
+                        .style(Style::default().fg(Color::DarkGray))
+                        .alignment(Alignment::Center);
+                    frame.render_widget(msg, main_area);
+                } else {
+                    let slide_widget = SlideWidget::new(current_slide, &highlighter);
+                    frame.render_widget(slide_widget, main_area);
+                }
+            }
+
+            // Render progress indicator (slide N / M) in footer area
+            let progress = format!("  {}  ", app.progress_text());
+            let footer = Paragraph::new(Line::from(vec![
+                Span::styled(progress, Style::default().fg(Color::DarkGray)),
+            ]))
+            .alignment(Alignment::Right);
+            frame.render_widget(footer, footer_area);
+        })?;
+
+        // 6. Poll events and dispatch actions to App
+        let action = tui::poll_event()?;
+        app.handle_action(action);
+
+        // 7. Break on Quit
+        if app.should_quit {
+            break;
+        }
+    }
+
+    // 8. Restore terminal
+    tui::restore()?;
 
     Ok(())
 }
