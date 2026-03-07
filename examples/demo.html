@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>terminal-slide demo</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#1a1a2e;color:#e0e0e0;overflow:hidden}
+.slide{display:none;flex-direction:column;justify-content:center;align-items:center;height:100vh;padding:4rem;text-align:center;position:absolute;top:0;left:0;width:100%}
+.slide.active{display:flex;animation:slideIn .3s cubic-bezier(.33,1,.68,1)}
+.slide.out-left{display:flex;animation:slideOutLeft .3s cubic-bezier(.33,1,.68,1) forwards}
+.slide.out-right{display:flex;animation:slideOutRight .3s cubic-bezier(.33,1,.68,1) forwards}
+@keyframes slideIn{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInReverse{from{opacity:0;transform:translateX(-60px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideOutLeft{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-60px)}}
+@keyframes slideOutRight{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(60px)}}
+h1{font-size:3rem;margin-bottom:1rem;color:#00d2ff}
+h2{font-size:2.2rem;margin-bottom:1.5rem;color:#00d2ff}
+p,li{font-size:1.3rem;line-height:1.8}
+ul{list-style:none;text-align:left}
+code{background:#2a2a4a;padding:0.2em 0.5em;border-radius:4px;font-family:monospace;color:#7fdbca}
+pre{background:#2a2a4a;padding:1.5rem;border-radius:8px;text-align:left;font-size:1rem;margin:1rem 0}
+pre code{background:none;padding:0}
+table{border-collapse:collapse;margin:1rem 0;font-size:1.1rem}
+th,td{border:1px solid #444;padding:0.5rem 1rem;text-align:left}
+th{background:#2a2a4a;color:#00d2ff}
+.progress{position:fixed;bottom:1rem;right:1.5rem;font-size:0.9rem;color:#666}
+strong{color:#fff}em{color:#a0c4ff}
+</style></head><body>
+<div class="slide active"><h1>terminal-slide</h1><p>A terminal-based slide presentation tool</p><p style="margin-top:2rem">Navigate with <strong>arrow keys</strong> or <code>j</code>/<code>k</code></p></div>
+<div class="slide"><h2>Features</h2><ul><li>Render <strong>Markdown</strong> slides in the terminal</li><li>Present <em>HTML</em> slides in the browser</li><li>Smooth slide transition animations</li><li>Syntax-highlighted code blocks</li></ul></div>
+<div class="slide"><h2>Code Example</h2><pre><code>fn main() {
+    let slides = parse_presentation("demo.md");
+    for slide in &amp;slides {
+        render(slide);
+    }
+}</code></pre></div>
+<div class="slide"><h2>Keyboard Shortcuts</h2><table><tr><th>Action</th><th>Keys</th></tr><tr><td>Next slide</td><td>Right, l, j, n, Space</td></tr><tr><td>Previous slide</td><td>Left, h, k, p</td></tr><tr><td>First slide</td><td>g</td></tr><tr><td>Last slide</td><td>G</td></tr></table></div>
+<div class="slide"><h2>Thank You</h2><p>Built with <strong>Rust</strong>, <em>ratatui</em>, and <code>tachyonfx</code></p></div>
+<div class="progress"></div>
+<script>
+const s=document.querySelectorAll('.slide'),p=document.querySelector('.progress');let c=0,animating=false;
+function go(i,dir){
+  if(animating||i===c)return;
+  var next=Math.max(0,Math.min(i,s.length-1));
+  if(next===c)return;
+  animating=true;
+  var old=s[c],nu=s[next];
+  var forward=dir==='fwd';
+  old.classList.remove('active');
+  old.classList.add(forward?'out-left':'out-right');
+  nu.style.animation='none';nu.offsetHeight;nu.style.animation='';
+  nu.classList.add('active');
+  nu.style.animationName=forward?'slideIn':'slideInReverse';
+  setTimeout(function(){old.classList.remove('out-left','out-right');nu.style.animationName='';animating=false},300);
+  c=next;
+  p.textContent=(c+1)+'/'+s.length;
+}
+p.textContent='1/'+s.length;
+document.addEventListener('keydown',function(e){
+  if(['ArrowRight','l','j','n',' '].indexOf(e.key)>=0)go(c+1,'fwd');
+  else if(['ArrowLeft','h','k','p'].indexOf(e.key)>=0)go(c-1,'bwd');
+  else if(e.key==='g')go(0,'bwd');
+  else if(e.key==='G')go(s.length-1,'fwd');
+});
+</script></body></html>

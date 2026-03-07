@@ -1,3 +1,6 @@
+# Build artifacts
+target/
+
 # Auto Claude data directory
 .auto-claude/
 
