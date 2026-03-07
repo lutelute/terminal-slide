@@ -51,6 +51,13 @@ impl App {
         }
     }
 
+    /// Returns true if the presentation has only a single slide.
+    ///
+    /// Used to decide whether to show navigation indicators in the footer.
+    pub fn is_single_slide(&self) -> bool {
+        self.total_slides <= 1
+    }
+
     /// Returns the progress indicator text (e.g., "3 / 12").
     ///
     /// Displays the 1-based current slide number and total count, suitable
@@ -283,6 +290,21 @@ mod tests {
         // Edge case: zero slides
         let app = App::new(0);
         assert_eq!(app.progress_text(), "1 / 0");
+    }
+
+    #[test]
+    fn test_is_single_slide() {
+        let app = App::new(0);
+        assert!(app.is_single_slide(), "zero slides should count as single");
+
+        let app = App::new(1);
+        assert!(app.is_single_slide(), "one slide should count as single");
+
+        let app = App::new(2);
+        assert!(!app.is_single_slide(), "two slides is not single");
+
+        let app = App::new(10);
+        assert!(!app.is_single_slide(), "ten slides is not single");
     }
 
     #[test]

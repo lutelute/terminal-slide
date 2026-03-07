@@ -2,7 +2,7 @@ use std::fs;
 use std::path::Path;
 use std::time::Instant;
 
-use anyhow::{bail, Result};
+use anyhow::{bail, Context, Result};
 use clap::Parser;
 use ratatui::layout::{Alignment, Constraint, Layout};
 use ratatui::style::{Color, Style};
@@ -23,12 +23,14 @@ use markdown::{SlideWidget, SyntaxHighlighter, parse_presentation};
 fn main() -> Result<()> {
     let args = Cli::parse();
 
+    // Check format first so unsupported extensions get a specific error
+    // even if the file doesn't exist
+    let format = detect_format(&args.file)?;
+
     let path = Path::new(&args.file);
     if !path.exists() {
         bail!("File not found: {}", args.file);
     }
-
-    let format = detect_format(&args.file)?;
 
     match format {
         PresentationFormat::Markdown => {
@@ -47,8 +49,9 @@ fn main() -> Result<()> {
 /// Reads the file, parses it into slides, initializes the TUI, and enters
 /// the main rendering/event loop until the user quits.
 fn run_markdown_presentation(file_path: &str) -> Result<()> {
-    // 1. Read file content
-    let content = fs::read_to_string(file_path)?;
+    // 1. Read file content (with user-friendly error for binary/corrupted files)
+    let content = fs::read_to_string(file_path)
+        .with_context(|| format!("Failed to read '{}' (is it a binary or corrupted file?)", file_path))?;
 
     // 2. Parse into Presentation via markdown::parser
     let presentation = parse_presentation(&content);
@@ -113,12 +116,22 @@ fn run_markdown_presentation(file_path: &str) -> Result<()> {
             }
 
             // Render progress indicator (slide N / M) in footer area
-            let progress = format!("  {}  ", app.progress_text());
-            let footer = Paragraph::new(Line::from(vec![
-                Span::styled(progress, Style::default().fg(Color::DarkGray)),
-            ]))
-            .alignment(Alignment::Right);
-            frame.render_widget(footer, footer_area);
+            // Hide for single-slide presentations since navigation is disabled
+            if app.is_single_slide() {
+                // Show a subtle help hint instead of navigation indicator
+                let hint = Paragraph::new(Line::from(vec![
+                    Span::styled("  q to quit  ", Style::default().fg(Color::DarkGray)),
+                ]))
+                .alignment(Alignment::Right);
+                frame.render_widget(hint, footer_area);
+            } else {
+                let progress = format!("  {}  ", app.progress_text());
+                let footer = Paragraph::new(Line::from(vec![
+                    Span::styled(progress, Style::default().fg(Color::DarkGray)),
+                ]))
+                .alignment(Alignment::Right);
+                frame.render_widget(footer, footer_area);
+            }
 
             // Apply transition effects AFTER widget rendering
             transition_manager.process(elapsed, frame.buffer_mut(), main_area);
