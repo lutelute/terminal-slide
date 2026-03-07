@@ -6,6 +6,7 @@ use clap::Parser;
 mod cli;
 mod markdown;
 mod slide;
+mod tui;
 
 use cli::{Cli, PresentationFormat, detect_format};
 
