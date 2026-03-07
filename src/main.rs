@@ -4,6 +4,7 @@ use anyhow::{bail, Result};
 use clap::Parser;
 
 mod cli;
+mod markdown;
 mod slide;
 
 use cli::{Cli, PresentationFormat, detect_format};
