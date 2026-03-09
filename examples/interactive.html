@@ -450,6 +450,42 @@ function startParticles(){
   draw();
 }
 
+/* ===== Skip: fast-forward animations to end state ===== */
+document.addEventListener('ts:animationskip',function(e){
+  var idx=e.detail.index,slide=slides[idx];
+  if(!slide)return;
+  // Counters: jump to target value
+  if(slide.id==='slide-counter'){
+    slide.querySelectorAll('.counter').forEach(function(el){
+      var target=parseInt(el.dataset.target),prefix=el.dataset.prefix||'';
+      el.textContent=prefix+target.toLocaleString();
+    });
+  }
+  // Typing: show all lines immediately
+  if(slide.id==='slide-typing'){
+    var container=document.getElementById('typing-container');
+    container.innerHTML='';
+    var lines=[
+      {text:'$ cargo build --release',color:'#7fdbca'},
+      {text:'   Compiling terminal-slide v0.1.0',color:'#888'},
+      {text:'    Finished release [optimized] in 12.3s',color:'#7fdbca'},
+      {text:'$ terminal-slide presentation.md',color:'#7fdbca'},
+      {text:'  ✓ Loaded 42 slides',color:'#00d2ff'},
+      {text:'  ✓ Ready. Press → to start.',color:'#00d2ff'}
+    ];
+    lines.forEach(function(l){
+      var div=document.createElement('div');
+      div.style.cssText='font-size:1.1rem;color:'+l.color+';margin:4px 0';
+      div.textContent=l.text;
+      container.appendChild(div);
+    });
+  }
+  // Bars: jump to full width
+  if(slide.id==='slide-bars'){
+    slide.querySelectorAll('.bar').forEach(function(b){b.classList.add('animate')});
+  }
+});
+
 /* ===== Init charts on load ===== */
 window.addEventListener('load',function(){
   initBarChart();initLineChart();initDoughnutChart();initRadarChart();

@@ -36,7 +36,7 @@ pub const SNIPPET: &str = r##"
 ._ts-btn._ts-paused{color:#ffcb6b;border-color:#ffcb6b55}
 ._ts-btn._ts-paused:hover{background:rgba(255,203,107,.15)}
 body._ts-animations-paused *{animation-play-state:paused!important;transition-duration:0s!important}
-body._ts-animations-skipped *{animation:none!important;transition:none!important}
+.slide._ts-skip-active,.slide._ts-skip-active *{animation-duration:0s!important;animation-delay:0s!important;transition-duration:0s!important;transition-delay:0s!important}
 
 ._ts-export-menu{position:fixed;bottom:3.5rem;left:1.5rem;background:rgba(20,20,35,.95);border:1px solid #333;border-radius:10px;padding:.6rem;display:none;z-index:99999;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 ._ts-export-menu.show{display:block;animation:_tsFadeUp .2s ease-out}
@@ -61,7 +61,7 @@ body._ts-animations-skipped *{animation:none!important;transition:none!important
   // Clean ALL slides: remove active and any transition classes
   function cleanAllSlides(){
     for(var i=0;i<slides.length;i++){
-      slides[i].classList.remove('active','out-left','out-right');
+      slides[i].classList.remove('active','out-left','out-right','_ts-skip-active');
       slides[i].style.animation='none';
     }
   }
@@ -70,6 +70,8 @@ body._ts-animations-skipped *{animation:none!important;transition:none!important
     if(idx<0||idx>=slides.length)return;
     idx=Math.max(0,Math.min(idx,slides.length-1));
     if(idx===_tsCur)return;
+    // Remove skip class from previous slide so it doesn't persist
+    slides[_tsCur].classList.remove('_ts-skip-active');
     cleanAllSlides();
     slides[idx].offsetHeight; // force reflow
     slides[idx].style.animation='';
@@ -216,35 +218,34 @@ body._ts-animations-skipped *{animation:none!important;transition:none!important
   // --- Animation Pause / Skip ---
   var pauseBtn=toolbar.querySelector('._ts-pause-btn');
   var skipBtn=toolbar.querySelector('._ts-skip-btn');
-  var animPaused=false,animSkipped=false;
+  var animPaused=false;
 
   pauseBtn.addEventListener('click',function(e){
     e.stopPropagation();
-    if(animSkipped)return; // can't pause if already skipped
     animPaused=!animPaused;
     document.body.classList.toggle('_ts-animations-paused',animPaused);
     pauseBtn.classList.toggle('_ts-paused',animPaused);
     pauseBtn.title=animPaused?'Resume animations':'Pause animations';
     pauseBtn.innerHTML=animPaused?'&#9654;':'&#9646;&#9646;';
-    // Dispatch event for user code
-    document.dispatchEvent(new CustomEvent('ts:animationstate',{detail:{paused:animPaused,skipped:animSkipped}}));
+    document.dispatchEvent(new CustomEvent('ts:animationstate',{detail:{paused:animPaused}}));
   });
 
+  // Skip = fast-forward current slide's animations to their end state (one-shot)
   skipBtn.addEventListener('click',function(e){
     e.stopPropagation();
-    animSkipped=!animSkipped;
-    animPaused=false;
-    document.body.classList.remove('_ts-animations-paused');
-    document.body.classList.toggle('_ts-animations-skipped',animSkipped);
-    pauseBtn.classList.remove('_ts-paused');
-    pauseBtn.innerHTML='&#9646;&#9646;';
-    pauseBtn.title='Pause animations';
-    pauseBtn.disabled=animSkipped;
-    pauseBtn.style.opacity=animSkipped?'0.3':'1';
-    skipBtn.classList.toggle('_ts-active',animSkipped);
-    skipBtn.title=animSkipped?'Restore animations':'Skip animations';
-    // Also stop any running intervals/requestAnimationFrame via event
-    document.dispatchEvent(new CustomEvent('ts:animationstate',{detail:{paused:false,skipped:animSkipped}}));
+    var cur=slides[_tsCur];
+    if(!cur)return;
+    // Resume if paused, so animations can reach end state
+    if(animPaused){animPaused=false;document.body.classList.remove('_ts-animations-paused');pauseBtn.classList.remove('_ts-paused');pauseBtn.innerHTML='&#9646;&#9646;';pauseBtn.title='Pause animations'}
+    // Apply skip class to force all animations/transitions to 0s duration
+    cur.classList.add('_ts-skip-active');
+    // Force reflow so the 0s duration takes effect immediately
+    cur.offsetHeight;
+    // Dispatch event so user JS (counters, typing, etc.) can jump to completion
+    document.dispatchEvent(new CustomEvent('ts:animationskip',{detail:{index:_tsCur}}));
+    // Brief visual feedback on the button
+    skipBtn.classList.add('_ts-active');
+    setTimeout(function(){skipBtn.classList.remove('_ts-active')},300);
   });
 
   // --- Export Menu ---
