@@ -4,6 +4,8 @@ use std::path::Path;
 use anyhow::{bail, Context, Result};
 use tiny_http::{Header, Request, Response, Server};
 
+use super::nav_snippet;
+
 /// Serves an HTML presentation file via a local HTTP server and opens the default browser.
 ///
 /// Starts a tiny_http server on `localhost:port`, serving the HTML file at the `/` route
@@ -108,6 +110,14 @@ fn handle_request(request: Request, base_dir: &Path, index_file: &str) {
     match fs::read(&canonical) {
         Ok(content) => {
             let mime = guess_mime_type(&canonical);
+
+            // Inject navigation UI into the main presentation HTML
+            let content = if relative == index_file && mime.starts_with("text/html") {
+                inject_navigation(&content)
+            } else {
+                content
+            };
+
             let header =
                 Header::from_bytes("Content-Type", mime).expect("valid Content-Type header");
             let response = Response::from_data(content).with_header(header);
@@ -171,6 +181,22 @@ fn percent_decode(input: &str) -> String {
     }
 
     String::from_utf8_lossy(&result).to_string()
+}
+
+/// Injects the navigation snippet into HTML content before `</body>`.
+fn inject_navigation(html_bytes: &[u8]) -> Vec<u8> {
+    let html = String::from_utf8_lossy(html_bytes);
+    if let Some(pos) = html.rfind("</body>") {
+        let mut result = String::with_capacity(html.len() + nav_snippet::SNIPPET.len());
+        result.push_str(&html[..pos]);
+        result.push_str(nav_snippet::SNIPPET);
+        result.push_str(&html[pos..]);
+        result.into_bytes()
+    } else {
+        let mut result = html.into_owned();
+        result.push_str(nav_snippet::SNIPPET);
+        result.into_bytes()
+    }
 }
 
 #[cfg(test)]
