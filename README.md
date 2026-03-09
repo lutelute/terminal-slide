@@ -59,6 +59,8 @@ HTML files are served on `localhost:8234` and opened in the default browser. Use
 
 See `examples/gallery.html` for a layout pattern gallery (2-column, 3-column, grid, free positioning).
 
+HTML mode supports any JavaScript library via CDN — charts, animations, even Python execution in the browser. See `examples/interactive.html` for demos of Chart.js, CSS animations, canvas particles, and Pyodide.
+
 ## Keyboard Shortcuts
 
 | Action         | Keys                   |
@@ -74,7 +76,8 @@ See `examples/gallery.html` for a layout pattern gallery (2-column, 3-column, gr
 ```bash
 terminal-slide examples/demo.md       # TUI presentation
 terminal-slide examples/demo.html     # Browser presentation
-terminal-slide examples/gallery.html  # Layout pattern gallery
+terminal-slide examples/gallery.html      # Layout pattern gallery
+terminal-slide examples/interactive.html  # Interactive demo (charts, Python, animations)
 ```
 
 ## Built With

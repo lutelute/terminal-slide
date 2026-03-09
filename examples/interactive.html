@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Interactive Slides</title>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0f0f1a;color:#e0e0e0;overflow:hidden}
+.slide{display:none;flex-direction:column;justify-content:center;align-items:center;height:100vh;padding:3rem 4rem;position:absolute;top:0;left:0;width:100%}
+.slide.active{display:flex;animation:fadeIn .35s cubic-bezier(.33,1,.68,1)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+h1{font-size:2.8rem;color:#00d2ff;margin-bottom:.5rem}
+h2{font-size:2rem;color:#00d2ff;margin-bottom:1.5rem;text-align:center;width:100%}
+p{font-size:1.1rem;line-height:1.7;color:#bbb}
+code{background:#1e1e30;padding:.15em .4em;border-radius:3px;font-family:'Fira Code',monospace;color:#7fdbca;font-size:.95em}
+.label{display:inline-block;background:#00d2ff22;color:#00d2ff;padding:.2em .7em;border-radius:4px;font-size:.85rem;margin-bottom:1rem;font-weight:600}
+.progress{position:fixed;bottom:1rem;right:1.5rem;font-size:.85rem;color:#555}
+.nav-hint{position:fixed;bottom:1rem;left:1.5rem;font-size:.8rem;color:#444}
+.card{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:12px;padding:1.5rem}
+.cols{display:flex;gap:2rem;width:100%;max-width:1100px}
+.cols>*{flex:1}
+button{background:#00d2ff;color:#0f0f1a;border:none;padding:.6rem 1.5rem;border-radius:6px;font-size:1rem;cursor:pointer;font-weight:600;transition:opacity .2s}
+button:hover{opacity:.8}
+button:disabled{opacity:.4;cursor:default}
+textarea,pre.output{font-family:'Fira Code',monospace;font-size:.9rem;border-radius:8px;padding:1rem;width:100%;resize:none}
+textarea{background:#1e1e30;color:#a0c4ff;border:1px solid #2a2a4a;height:120px}
+pre.output{background:#0a0a15;color:#7fdbca;border:1px solid #1a1a2e;min-height:60px;max-height:150px;overflow-y:auto;white-space:pre-wrap}
+.chart-container{width:100%;max-width:500px;position:relative}
+canvas{border-radius:8px}
+
+/* Animated elements */
+.bar{height:30px;border-radius:4px;margin:6px 0;transition:width 1s cubic-bezier(.33,1,.68,1);width:0}
+.bar.animate{width:var(--w)}
+.bounce{animation:bounce 2s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+.spin{display:inline-block;animation:spin 3s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pulse{animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.05)}}
+.typing{border-right:2px solid #00d2ff;white-space:nowrap;overflow:hidden;width:0;animation:typing 3s steps(40) forwards,blink .7s step-end infinite}
+@keyframes typing{to{width:100%}}
+@keyframes blink{50%{border-color:transparent}}
+.counter{font-size:4rem;font-weight:bold;color:#00d2ff;font-variant-numeric:tabular-nums}
+.particle-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+</style></head><body>
+
+<!-- ========== Slide 1: Title ========== -->
+<div class="slide active">
+  <div style="text-align:center">
+    <p class="label">INTERACTIVE DEMO</p>
+    <h1>Graphs, Animation, Python</h1>
+    <p style="font-size:1.3rem;margin-top:1rem;color:#888">HTMLスライドで動的コンテンツを埋め込む</p>
+    <p style="margin-top:2rem;color:#555">→ キーで次へ</p>
+  </div>
+</div>
+
+<!-- ========== Slide 2: Chart.js Bar ========== -->
+<div class="slide">
+  <h2>Chart.js — Bar Chart</h2>
+  <div class="cols">
+    <div class="card" style="flex:1.3">
+      <div class="chart-container"><canvas id="barChart"></canvas></div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;justify-content:center">
+      <p class="label">HOW</p>
+      <p>CDNから <code>chart.js</code> を読み込むだけ。スライド表示時にグラフを初期化。</p>
+      <p style="margin-top:1rem;font-size:.9rem;color:#666">データ更新ボタンで動的に変化</p>
+      <button onclick="updateBarChart()" style="margin-top:1rem">Update Data</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Slide 3: Chart.js Line ========== -->
+<div class="slide">
+  <h2>Chart.js — Line Chart</h2>
+  <div class="cols">
+    <div class="card" style="flex:1.3">
+      <div class="chart-container"><canvas id="lineChart"></canvas></div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;justify-content:center">
+      <p class="label">REALTIME</p>
+      <p>ライブデータのシミュレーション。スライド表示中にデータが追加されていく。</p>
+      <button onclick="toggleLiveData()" style="margin-top:1rem" id="liveBtn">Start Live</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Slide 4: Chart.js Doughnut + Radar ========== -->
+<div class="slide">
+  <h2>Chart.js — Doughnut & Radar</h2>
+  <div class="cols">
+    <div class="card" style="text-align:center">
+      <p class="label">DOUGHNUT</p>
+      <div class="chart-container" style="max-width:280px;margin:0 auto"><canvas id="doughnutChart"></canvas></div>
+    </div>
+    <div class="card" style="text-align:center">
+      <p class="label">RADAR</p>
+      <div class="chart-container" style="max-width:300px;margin:0 auto"><canvas id="radarChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Slide 5: CSS Animations ========== -->
+<div class="slide">
+  <h2>CSS Animations</h2>
+  <div class="cols" style="max-width:900px">
+    <div class="card" style="text-align:center">
+      <p class="label">BOUNCE</p>
+      <div class="bounce" style="font-size:3rem;margin:1rem 0">🚀</div>
+      <code>animation: bounce 2s infinite</code>
+    </div>
+    <div class="card" style="text-align:center">
+      <p class="label">SPIN</p>
+      <div class="spin" style="font-size:3rem;margin:1rem 0">⚙️</div>
+      <code>animation: spin 3s linear infinite</code>
+    </div>
+    <div class="card" style="text-align:center">
+      <p class="label">PULSE</p>
+      <div class="pulse" style="font-size:3rem;margin:1rem 0">💎</div>
+      <code>animation: pulse 2s infinite</code>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Slide 6: Animated Bars ========== -->
+<div class="slide" id="slide-bars">
+  <h2>Animated Bar Chart (Pure CSS)</h2>
+  <div class="card" style="width:100%;max-width:700px">
+    <div style="display:flex;align-items:center;gap:1rem;margin:4px 0"><span style="width:80px;text-align:right;color:#888">Rust</span><div class="bar" style="--w:92%;background:linear-gradient(90deg,#00d2ff,#0090ff)"></div><span style="color:#888">92%</span></div>
+    <div style="display:flex;align-items:center;gap:1rem;margin:4px 0"><span style="width:80px;text-align:right;color:#888">Python</span><div class="bar" style="--w:85%;background:linear-gradient(90deg,#7fdbca,#3daa8e)"></div><span style="color:#888">85%</span></div>
+    <div style="display:flex;align-items:center;gap:1rem;margin:4px 0"><span style="width:80px;text-align:right;color:#888">TypeScript</span><div class="bar" style="--w:78%;background:linear-gradient(90deg,#c792ea,#9b59b6)"></div><span style="color:#888">78%</span></div>
+    <div style="display:flex;align-items:center;gap:1rem;margin:4px 0"><span style="width:80px;text-align:right;color:#888">Go</span><div class="bar" style="--w:65%;background:linear-gradient(90deg,#f78c6c,#e74c3c)"></div><span style="color:#888">65%</span></div>
+    <div style="display:flex;align-items:center;gap:1rem;margin:4px 0"><span style="width:80px;text-align:right;color:#888">C++</span><div class="bar" style="--w:55%;background:linear-gradient(90deg,#ffcb6b,#f39c12)"></div><span style="color:#888">55%</span></div>
+  </div>
+  <p style="margin-top:1rem;color:#555">スライド表示時にアニメーション開始</p>
+</div>
+
+<!-- ========== Slide 7: Counter Animation ========== -->
+<div class="slide" id="slide-counter">
+  <h2>Counter Animation</h2>
+  <div class="cols" style="max-width:800px;text-align:center">
+    <div class="card">
+      <p class="label">USERS</p>
+      <div class="counter" data-target="12847" data-prefix="">0</div>
+    </div>
+    <div class="card">
+      <p class="label">DOWNLOADS</p>
+      <div class="counter" data-target="58392" data-prefix="">0</div>
+    </div>
+    <div class="card">
+      <p class="label">STARS</p>
+      <div class="counter" data-target="3241" data-prefix="">0</div>
+    </div>
+  </div>
+  <p style="margin-top:1rem;color:#555">JavaScriptでカウントアップアニメーション</p>
+</div>
+
+<!-- ========== Slide 8: Typing Effect ========== -->
+<div class="slide" id="slide-typing">
+  <h2>Typing Effect</h2>
+  <div class="card" style="max-width:800px;width:100%;padding:2rem">
+    <div id="typing-container" style="font-family:'Fira Code',monospace;font-size:1.2rem;min-height:120px">
+    </div>
+  </div>
+  <p style="margin-top:1rem;color:#555">1行ずつタイプライター風に表示</p>
+</div>
+
+<!-- ========== Slide 9: Pyodide (Python in browser) ========== -->
+<div class="slide">
+  <h2>Python in Browser (Pyodide)</h2>
+  <div class="cols">
+    <div class="card">
+      <p class="label">CODE</p>
+      <textarea id="pyCode">import math
+
+# Calculate fibonacci
+def fib(n):
+    a, b = 0, 1
+    for _ in range(n):
+        a, b = b, a + b
+    return a
+
+results = [fib(i) for i in range(15)]
+print("Fibonacci:", results)
+print(f"Pi = {math.pi:.10f}")
+print(f"sqrt(2) = {math.sqrt(2):.10f}")</textarea>
+      <button onclick="runPython()" style="margin-top:.8rem" id="pyRunBtn">Run Python</button>
+    </div>
+    <div class="card">
+      <p class="label">OUTPUT</p>
+      <pre class="output" id="pyOutput">Click "Run Python" to execute
+(Pyodide の初回ロードに数秒かかります)</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Slide 10: Particle Animation ========== -->
+<div class="slide" id="slide-particles">
+  <canvas id="particleCanvas" class="particle-canvas"></canvas>
+  <div style="text-align:center;position:relative;z-index:1">
+    <h2>Canvas Particle Animation</h2>
+    <p style="margin-top:1rem">Canvas API でリアルタイムパーティクル描画</p>
+    <p style="margin-top:.5rem;color:#555">マウスを動かしてみてください</p>
+  </div>
+</div>
+
+<!-- ========== Slide 11: Summary ========== -->
+<div class="slide">
+  <div style="text-align:center">
+    <h2 style="margin-bottom:2rem">使えるもの一覧</h2>
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:.8rem 2rem;text-align:left;max-width:600px;margin:0 auto">
+      <code>Chart.js</code><span style="color:#888">Bar, Line, Doughnut, Radar...</span>
+      <code>D3.js</code><span style="color:#888">高度なデータ可視化</span>
+      <code>Pyodide</code><span style="color:#888">ブラウザ内でPython実行</span>
+      <code>CSS Animation</code><span style="color:#888">bounce, spin, pulse, typing...</span>
+      <code>Canvas API</code><span style="color:#888">パーティクル、描画</span>
+      <code>Three.js</code><span style="color:#888">3Dグラフィクス</span>
+      <code>Mermaid.js</code><span style="color:#888">フローチャート、シーケンス図</span>
+      <code>Lottie</code><span style="color:#888">After Effectsアニメーション</span>
+    </div>
+    <p style="margin-top:2.5rem;color:#555">CDNから読み込むだけ。何でも使えます。</p>
+  </div>
+</div>
+
+<div class="progress"></div>
+<div class="nav-hint">← → で移動</div>
+
+<script>
+/* ===== Slide Navigation ===== */
+const slides=document.querySelectorAll('.slide'),prog=document.querySelector('.progress');
+let cur=0,busy=false;
+function go(i){
+  if(busy||i===cur)return;
+  var next=Math.max(0,Math.min(i,slides.length-1));
+  if(next===cur)return;
+  busy=true;
+  slides[cur].classList.remove('active');
+  slides[next].style.animation='none';slides[next].offsetHeight;slides[next].style.animation='';
+  slides[next].classList.add('active');
+  cur=next;
+  prog.textContent=(cur+1)+' / '+slides.length;
+  onSlideEnter(cur);
+  setTimeout(function(){busy=false},350);
+}
+prog.textContent='1 / '+slides.length;
+document.addEventListener('keydown',function(e){
+  if(e.target.tagName==='TEXTAREA')return;
+  if(['ArrowRight','l','j','n',' '].indexOf(e.key)>=0){e.preventDefault();go(cur+1)}
+  else if(['ArrowLeft','h','k','p'].indexOf(e.key)>=0){e.preventDefault();go(cur-1)}
+  else if(e.key==='g')go(0);
+  else if(e.key==='G')go(slides.length-1);
+});
+
+/* ===== Slide Enter Hooks ===== */
+function onSlideEnter(idx){
+  var slide=slides[idx];
+  // Animate bars
+  if(slide.id==='slide-bars'){
+    var bars=slide.querySelectorAll('.bar');
+    bars.forEach(function(b){b.classList.remove('animate')});
+    setTimeout(function(){bars.forEach(function(b){b.classList.add('animate')})},100);
+  }
+  // Counter animation
+  if(slide.id==='slide-counter'){
+    slide.querySelectorAll('.counter').forEach(animateCounter);
+  }
+  // Typing effect
+  if(slide.id==='slide-typing'){
+    startTyping();
+  }
+  // Particles
+  if(slide.id==='slide-particles'){
+    startParticles();
+  }
+}
+
+/* ===== Chart.js: Bar ===== */
+let barChart;
+function initBarChart(){
+  var ctx=document.getElementById('barChart');
+  if(!ctx)return;
+  barChart=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:['Jan','Feb','Mar','Apr','May','Jun'],
+      datasets:[{label:'Revenue ($K)',data:[42,55,68,81,73,95],backgroundColor:'rgba(0,210,255,0.6)',borderColor:'#00d2ff',borderWidth:1,borderRadius:4}]
+    },
+    options:{responsive:true,plugins:{legend:{labels:{color:'#888'}}},scales:{x:{ticks:{color:'#666'},grid:{color:'#1a1a2e'}},y:{ticks:{color:'#666'},grid:{color:'#1a1a2e'}}}}
+  });
+}
+function updateBarChart(){
+  if(!barChart)return;
+  barChart.data.datasets[0].data=barChart.data.datasets[0].data.map(function(){return Math.floor(Math.random()*100)+20});
+  barChart.update();
+}
+
+/* ===== Chart.js: Line ===== */
+let lineChart,liveInterval;
+function initLineChart(){
+  var ctx=document.getElementById('lineChart');
+  if(!ctx)return;
+  lineChart=new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:['0s','1s','2s','3s','4s'],
+      datasets:[{label:'CPU Usage (%)',data:[30,45,38,52,41],borderColor:'#7fdbca',backgroundColor:'rgba(127,219,202,0.1)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#7fdbca'}]
+    },
+    options:{responsive:true,animation:{duration:500},plugins:{legend:{labels:{color:'#888'}}},scales:{x:{ticks:{color:'#666'},grid:{color:'#1a1a2e'}},y:{min:0,max:100,ticks:{color:'#666'},grid:{color:'#1a1a2e'}}}}
+  });
+}
+function toggleLiveData(){
+  var btn=document.getElementById('liveBtn');
+  if(liveInterval){clearInterval(liveInterval);liveInterval=null;btn.textContent='Start Live';return}
+  btn.textContent='Stop Live';
+  var t=5;
+  liveInterval=setInterval(function(){
+    if(!lineChart)return;
+    t++;
+    lineChart.data.labels.push(t+'s');
+    lineChart.data.datasets[0].data.push(Math.floor(Math.random()*60)+20);
+    if(lineChart.data.labels.length>15){lineChart.data.labels.shift();lineChart.data.datasets[0].data.shift()}
+    lineChart.update();
+  },1000);
+}
+
+/* ===== Chart.js: Doughnut ===== */
+function initDoughnutChart(){
+  var ctx=document.getElementById('doughnutChart');
+  if(!ctx)return;
+  new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      labels:['Rust','Python','TypeScript','Go'],
+      datasets:[{data:[35,30,25,10],backgroundColor:['#00d2ff','#7fdbca','#c792ea','#f78c6c'],borderColor:'#1a1a2e',borderWidth:2}]
+    },
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#888',padding:12}}}}
+  });
+}
+
+/* ===== Chart.js: Radar ===== */
+function initRadarChart(){
+  var ctx=document.getElementById('radarChart');
+  if(!ctx)return;
+  new Chart(ctx,{
+    type:'radar',
+    data:{
+      labels:['Speed','Safety','Ecosystem','Learning','Community'],
+      datasets:[
+        {label:'Rust',data:[95,98,70,40,75],borderColor:'#00d2ff',backgroundColor:'rgba(0,210,255,0.15)',pointBackgroundColor:'#00d2ff'},
+        {label:'Python',data:[40,50,95,90,95],borderColor:'#7fdbca',backgroundColor:'rgba(127,219,202,0.15)',pointBackgroundColor:'#7fdbca'}
+      ]
+    },
+    options:{responsive:true,scales:{r:{grid:{color:'#2a2a4a'},angleLines:{color:'#2a2a4a'},pointLabels:{color:'#888'},ticks:{display:false}}},plugins:{legend:{labels:{color:'#888'}}}}
+  });
+}
+
+/* ===== Counter Animation ===== */
+function animateCounter(el){
+  var target=parseInt(el.dataset.target),prefix=el.dataset.prefix||'';
+  var duration=2000,start=performance.now();
+  el.textContent=prefix+'0';
+  function step(now){
+    var progress=Math.min((now-start)/duration,1);
+    var eased=1-Math.pow(1-progress,3);
+    el.textContent=prefix+Math.floor(target*eased).toLocaleString();
+    if(progress<1)requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ===== Typing Effect ===== */
+function startTyping(){
+  var container=document.getElementById('typing-container');
+  container.innerHTML='';
+  var lines=[
+    {text:'$ cargo build --release',color:'#7fdbca',delay:0},
+    {text:'   Compiling terminal-slide v0.1.0',color:'#888',delay:800},
+    {text:'    Finished release [optimized] in 12.3s',color:'#7fdbca',delay:1600},
+    {text:'$ terminal-slide presentation.md',color:'#7fdbca',delay:2800},
+    {text:'  ✓ Loaded 42 slides',color:'#00d2ff',delay:3600},
+    {text:'  ✓ Ready. Press → to start.',color:'#00d2ff',delay:4200}
+  ];
+  lines.forEach(function(l){
+    setTimeout(function(){
+      var div=document.createElement('div');
+      div.style.cssText='font-size:1.1rem;color:'+l.color+';margin:4px 0;opacity:0;transform:translateX(-10px);transition:all .3s';
+      div.textContent=l.text;
+      container.appendChild(div);
+      requestAnimationFrame(function(){div.style.opacity='1';div.style.transform='translateX(0)'});
+    },l.delay);
+  });
+}
+
+/* ===== Pyodide ===== */
+let pyodide=null;
+async function runPython(){
+  var btn=document.getElementById('pyRunBtn');
+  var output=document.getElementById('pyOutput');
+  var code=document.getElementById('pyCode').value;
+  btn.disabled=true;
+  btn.textContent='Loading...';
+  try{
+    if(!pyodide){
+      output.textContent='Loading Pyodide...';
+      pyodide=await loadPyodide();
+    }
+    btn.textContent='Running...';
+    pyodide.runPython('import io,sys; sys.stdout=io.StringIO()');
+    pyodide.runPython(code);
+    var stdout=pyodide.runPython('sys.stdout.getvalue()');
+    output.textContent=stdout||'(no output)';
+  }catch(e){
+    output.textContent='Error: '+e.message;
+  }
+  btn.disabled=false;
+  btn.textContent='Run Python';
+}
+
+/* ===== Particle Animation ===== */
+let particleAnim=null;
+function startParticles(){
+  var canvas=document.getElementById('particleCanvas');
+  var ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+  if(particleAnim)cancelAnimationFrame(particleAnim);
+  var particles=[],mouseX=canvas.width/2,mouseY=canvas.height/2;
+  for(var i=0;i<80;i++){
+    particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-.5)*1.5,vy:(Math.random()-.5)*1.5,r:Math.random()*2+1});
+  }
+  canvas.parentElement.addEventListener('mousemove',function(e){mouseX=e.clientX;mouseY=e.clientY});
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(function(p){
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>canvas.width)p.vx*=-1;
+      if(p.y<0||p.y>canvas.height)p.vy*=-1;
+      var dx=mouseX-p.x,dy=mouseY-p.y,dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<150){p.x-=dx*0.02;p.y-=dy*0.02}
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(0,210,255,'+(0.3+p.r/4)+')';ctx.fill();
+    });
+    // Draw lines between nearby particles
+    for(var i=0;i<particles.length;i++){
+      for(var j=i+1;j<particles.length;j++){
+        var dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y,d=Math.sqrt(dx*dx+dy*dy);
+        if(d<120){ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.strokeStyle='rgba(0,210,255,'+(1-d/120)*0.2+')';ctx.stroke()}
+      }
+    }
+    particleAnim=requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+/* ===== Init charts on load ===== */
+window.addEventListener('load',function(){
+  initBarChart();initLineChart();initDoughnutChart();initRadarChart();
+});
+</script>
+</body></html>
