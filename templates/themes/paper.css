@@ -1,0 +1,34 @@
+/* Terminal Slide - Paper Theme */
+:root {
+  --ts-bg: #faf6f0;
+  --ts-text: #3c3836;
+  --ts-accent: #b16286;
+  --ts-accent2: #458588;
+  --ts-card-bg: #f2ece4;
+  --ts-card-border: #d5cec4;
+  --ts-code-bg: #ede8e0;
+  --ts-code-text: #9d0006;
+  --ts-muted: #7c6f64;
+}
+body { background: var(--ts-bg); color: var(--ts-text); font-family: 'Georgia', 'Times New Roman', serif; margin: 0; }
+.slide { background: var(--ts-bg); padding: 2rem; min-height: 100vh; box-sizing: border-box; }
+h1, h2, h3 { color: var(--ts-accent); margin-top: 0; }
+h1 { font-size: 2.4rem; border-bottom: 2px solid var(--ts-accent); padding-bottom: 0.5rem; }
+h2 { font-size: 1.8rem; }
+h3 { font-size: 1.3rem; color: var(--ts-accent2); }
+.card {
+  background: var(--ts-card-bg); border: 1px solid var(--ts-card-border);
+  border-radius: 4px; padding: 1.2rem; margin: 0.8rem 0;
+}
+code { background: var(--ts-code-bg); color: var(--ts-code-text); padding: 0.15em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'Courier New', monospace; }
+pre { background: var(--ts-code-bg); border: 1px solid var(--ts-card-border); border-radius: 4px; padding: 1rem; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+.label {
+  display: inline-block; background: var(--ts-accent); color: #fff;
+  padding: 0.15em 0.6em; border-radius: 3px; font-size: 0.8em; font-weight: 600;
+}
+table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+th, td { padding: 0.6rem 0.8rem; border: 1px solid var(--ts-card-border); text-align: left; }
+th { background: var(--ts-card-bg); color: var(--ts-accent); font-weight: 600; }
+strong { color: var(--ts-accent); }
+em { color: var(--ts-muted); font-style: italic; }

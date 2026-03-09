@@ -1,0 +1,36 @@
+/* Terminal Slide - Neon Theme */
+:root {
+  --ts-bg: #000000;
+  --ts-text: #e0e0e0;
+  --ts-accent: #39ff14;
+  --ts-accent2: #ff00ff;
+  --ts-card-bg: #111111;
+  --ts-card-border: #333333;
+  --ts-code-bg: #0a0a0a;
+  --ts-code-text: #39ff14;
+  --ts-muted: #777;
+}
+body { background: var(--ts-bg); color: var(--ts-text); font-family: 'Inter', sans-serif; margin: 0; }
+.slide { background: var(--ts-bg); padding: 2rem; min-height: 100vh; box-sizing: border-box; }
+h1, h2, h3 { margin-top: 0; }
+h1 { font-size: 2.4rem; color: var(--ts-accent); border-bottom: 2px solid var(--ts-accent); padding-bottom: 0.5rem; text-shadow: 0 0 8px var(--ts-accent); }
+h2 { font-size: 1.8rem; color: var(--ts-accent); }
+h3 { font-size: 1.3rem; color: var(--ts-accent2); text-shadow: 0 0 6px var(--ts-accent2); }
+.card {
+  background: var(--ts-card-bg); border: 1px solid var(--ts-accent);
+  border-radius: 8px; padding: 1.2rem; margin: 0.8rem 0;
+  box-shadow: 0 0 6px rgba(57, 255, 20, 0.15);
+}
+code { background: var(--ts-code-bg); color: var(--ts-code-text); padding: 0.15em 0.4em; border-radius: 4px; font-size: 0.9em; }
+pre { background: var(--ts-code-bg); border: 1px solid var(--ts-card-border); border-radius: 6px; padding: 1rem; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+.label {
+  display: inline-block; background: var(--ts-accent2); color: #fff;
+  padding: 0.15em 0.6em; border-radius: 4px; font-size: 0.8em; font-weight: 600;
+  text-shadow: 0 0 4px var(--ts-accent2);
+}
+table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+th, td { padding: 0.6rem 0.8rem; border: 1px solid var(--ts-card-border); text-align: left; }
+th { background: var(--ts-card-bg); color: var(--ts-accent); font-weight: 600; }
+strong { color: var(--ts-accent); }
+em { color: var(--ts-accent2); font-style: italic; }

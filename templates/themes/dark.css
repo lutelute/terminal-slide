@@ -1,0 +1,34 @@
+/* Terminal Slide - Dark Theme */
+:root {
+  --ts-bg: #0f0f1a;
+  --ts-text: #e0e0e0;
+  --ts-accent: #00d2ff;
+  --ts-accent2: #7b61ff;
+  --ts-card-bg: #1a1a2e;
+  --ts-card-border: #2a2a4a;
+  --ts-code-bg: #1e1e2e;
+  --ts-code-text: #00d2ff;
+  --ts-muted: #888;
+}
+body { background: var(--ts-bg); color: var(--ts-text); font-family: 'Inter', sans-serif; margin: 0; }
+.slide { background: var(--ts-bg); padding: 2rem; min-height: 100vh; box-sizing: border-box; }
+h1, h2, h3 { color: var(--ts-accent); margin-top: 0; }
+h1 { font-size: 2.4rem; border-bottom: 2px solid var(--ts-accent); padding-bottom: 0.5rem; }
+h2 { font-size: 1.8rem; }
+h3 { font-size: 1.3rem; color: var(--ts-accent2); }
+.card {
+  background: var(--ts-card-bg); border: 1px solid var(--ts-card-border);
+  border-radius: 8px; padding: 1.2rem; margin: 0.8rem 0;
+}
+code { background: var(--ts-code-bg); color: var(--ts-code-text); padding: 0.15em 0.4em; border-radius: 4px; font-size: 0.9em; }
+pre { background: var(--ts-code-bg); border: 1px solid var(--ts-card-border); border-radius: 6px; padding: 1rem; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+.label {
+  display: inline-block; background: var(--ts-accent); color: var(--ts-bg);
+  padding: 0.15em 0.6em; border-radius: 4px; font-size: 0.8em; font-weight: 600;
+}
+table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+th, td { padding: 0.6rem 0.8rem; border: 1px solid var(--ts-card-border); text-align: left; }
+th { background: var(--ts-card-bg); color: var(--ts-accent); font-weight: 600; }
+strong { color: var(--ts-accent); }
+em { color: var(--ts-muted); font-style: italic; }

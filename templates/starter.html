@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Change the title for your presentation -->
+<title>My Presentation</title>
+<style>
+/* ── Dark Theme (custom properties) ── */
+:root {
+  --ts-bg: #0f0f1a;
+  --ts-text: #e0e0e0;
+  --ts-accent: #00d2ff;
+  --ts-accent2: #7b61ff;
+  --ts-card-bg: #1a1a2e;
+  --ts-card-border: #2a2a4a;
+  --ts-code-bg: #1e1e2e;
+  --ts-code-text: #00d2ff;
+  --ts-muted: #888;
+}
+/* ── Base Reset & Layout ── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+       background: var(--ts-bg); color: var(--ts-text); overflow: hidden; }
+/* ── Slide Container ── */
+.slide { display: none; flex-direction: column; justify-content: center;
+         align-items: center; height: 100vh; padding: 4rem;
+         text-align: center; position: absolute; top: 0; left: 0; width: 100%; }
+.slide.active { display: flex; animation: slideIn .3s ease-out; }
+.slide.out-left  { display: flex; animation: slideOutLeft .3s ease-out forwards; }
+.slide.out-right { display: flex; animation: slideOutRight .3s ease-out forwards; }
+@keyframes slideIn        { from { opacity:0; transform:translateX(60px) } to { opacity:1; transform:translateX(0) } }
+@keyframes slideInReverse { from { opacity:0; transform:translateX(-60px)} to { opacity:1; transform:translateX(0) } }
+@keyframes slideOutLeft   { to   { opacity:0; transform:translateX(-60px) } }
+@keyframes slideOutRight  { to   { opacity:0; transform:translateX(60px)  } }
+/* ── Typography ── */
+h1 { font-size: 3rem; margin-bottom: 1rem; color: var(--ts-accent);
+     border-bottom: 2px solid var(--ts-accent); padding-bottom: 0.5rem; }
+h2 { font-size: 2.2rem; margin-bottom: 1.5rem; color: var(--ts-accent); }
+h3 { font-size: 1.3rem; color: var(--ts-accent2); }
+p, li { font-size: 1.3rem; line-height: 1.8; }
+ul { list-style: none; text-align: left; }
+strong { color: #fff; }
+em { color: var(--ts-muted); font-style: italic; }
+/* ── Cards ── */
+.card { background: var(--ts-card-bg); border: 1px solid var(--ts-card-border);
+        border-radius: 8px; padding: 1.2rem; margin: 0.8rem 0; }
+/* ── Code Blocks ── */
+code { background: var(--ts-code-bg); color: var(--ts-code-text);
+       padding: 0.15em 0.4em; border-radius: 4px; font-size: 0.9em; }
+pre  { background: var(--ts-code-bg); border: 1px solid var(--ts-card-border);
+       border-radius: 6px; padding: 1.5rem; text-align: left;
+       font-size: 1rem; margin: 1rem 0; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+/* ── Labels ── */
+.label { display: inline-block; background: var(--ts-accent); color: var(--ts-bg);
+         padding: 0.15em 0.6em; border-radius: 4px; font-size: 0.8em; font-weight: 600; }
+/* ── Tables ── */
+table { border-collapse: collapse; margin: 1rem 0; font-size: 1.1rem; }
+th, td { border: 1px solid var(--ts-card-border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--ts-card-bg); color: var(--ts-accent); font-weight: 600; }
+/* ── Progress Indicator ── */
+.progress { position: fixed; bottom: 1rem; right: 1.5rem; font-size: 0.9rem; color: var(--ts-muted); }
+</style>
+</head>
+<body>
+
+<!-- ====== SLIDES START ====== -->
+<!-- Each <div class="slide"> is one slide. The first one needs class="active". -->
+<!-- Slide 1: Title -->
+<div class="slide active">
+  <h1>Your Presentation Title</h1>
+  <p>A short subtitle or description goes here</p>
+  <p style="margin-top:2rem"><em>Navigate: arrow keys, j/k, or Space</em></p>
+</div>
+<!-- Slide 2: Content — customize or duplicate this block -->
+<div class="slide">
+  <h2>Key Points</h2>
+  <ul>
+    <li>First item with <strong>bold</strong> emphasis</li>
+    <li>Second item with <code>inline code</code></li>
+    <li>Third item with <em>muted text</em></li>
+  </ul>
+</div>
+<!-- Slide 3: Thank You -->
+<div class="slide">
+  <h2>Thank You</h2>
+  <p>Questions? Reach out at <code>you@example.com</code></p>
+</div>
+<!-- ====== SLIDES END ====== -->
+<div class="progress"></div>
+<!-- ── Keyboard Navigation ── -->
+<script>
+const slides = document.querySelectorAll('.slide');
+const progress = document.querySelector('.progress');
+let current = 0, animating = false;
+function go(i, dir) {
+  if (animating || i === current) return;
+  const next = Math.max(0, Math.min(i, slides.length - 1));
+  if (next === current) return;
+  animating = true;
+  const old = slides[current], nu = slides[next];
+  const fwd = dir === 'fwd';
+  old.classList.remove('active');
+  old.classList.add(fwd ? 'out-left' : 'out-right');
+  nu.style.animation = 'none'; nu.offsetHeight; nu.style.animation = '';
+  nu.classList.add('active');
+  nu.style.animationName = fwd ? 'slideIn' : 'slideInReverse';
+  setTimeout(() => { old.classList.remove('out-left','out-right'); nu.style.animationName = ''; animating = false; }, 300);
+  current = next;
+  progress.textContent = (current + 1) + ' / ' + slides.length;
+}
+progress.textContent = '1 / ' + slides.length;
+document.addEventListener('keydown', e => {
+  if (['ArrowRight','l','j','n',' '].includes(e.key)) go(current + 1, 'fwd');
+  else if (['ArrowLeft','h','k','p'].includes(e.key)) go(current - 1, 'bwd');
+  else if (e.key === 'g') go(0, 'bwd');
+  else if (e.key === 'G') go(slides.length - 1, 'fwd');
+});
+</script>
+</body>
+</html>

@@ -33,6 +33,11 @@ pub const SNIPPET: &str = r##"
 ._ts-gallery-info h4{color:#e0e0e0;font-size:.9rem;margin:0;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 ._ts-gallery-info p{color:#666;font-size:.75rem;margin:.2rem 0 0}
 
+._ts-btn._ts-paused{color:#ffcb6b;border-color:#ffcb6b55}
+._ts-btn._ts-paused:hover{background:rgba(255,203,107,.15)}
+body._ts-animations-paused *{animation-play-state:paused!important;transition-duration:0s!important}
+body._ts-animations-skipped *{animation:none!important;transition:none!important}
+
 ._ts-export-menu{position:fixed;bottom:3.5rem;left:1.5rem;background:rgba(20,20,35,.95);border:1px solid #333;border-radius:10px;padding:.6rem;display:none;z-index:99999;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 ._ts-export-menu.show{display:block;animation:_tsFadeUp .2s ease-out}
 ._ts-export-item{display:flex;align-items:center;gap:.6rem;padding:.5rem .8rem;border-radius:6px;cursor:pointer;color:#aaa;font-size:.85rem;transition:all .15s;white-space:nowrap}
@@ -106,7 +111,7 @@ pub const SNIPPET: &str = r##"
   // --- Toolbar ---
   var toolbar=document.createElement('div');
   toolbar.className='_ts-toolbar';
-  toolbar.innerHTML='<button class="_ts-btn _ts-counter-btn">1 / '+slides.length+'</button><button class="_ts-btn _ts-grid-btn" title="Gallery view">&#9638;</button><button class="_ts-btn _ts-export-btn" title="Export">&#8615;</button>';
+  toolbar.innerHTML='<button class="_ts-btn _ts-counter-btn">1 / '+slides.length+'</button><button class="_ts-btn _ts-grid-btn" title="Gallery view">&#9638;</button><button class="_ts-btn _ts-pause-btn" title="Pause animations">&#9646;&#9646;</button><button class="_ts-btn _ts-skip-btn" title="Skip animations">&#9197;</button><button class="_ts-btn _ts-export-btn" title="Export">&#8615;</button>';
   document.body.appendChild(toolbar);
   var counterBtn=toolbar.querySelector('._ts-counter-btn');
   var gridBtn=toolbar.querySelector('._ts-grid-btn');
@@ -207,6 +212,40 @@ pub const SNIPPET: &str = r##"
   }
   gallery.querySelector('._ts-gallery-close').addEventListener('click',function(e){e.stopPropagation();closeGallery()});
   gridBtn.addEventListener('click',function(e){e.stopPropagation();closeJump();if(galleryOpen)closeGallery();else openGallery()});
+
+  // --- Animation Pause / Skip ---
+  var pauseBtn=toolbar.querySelector('._ts-pause-btn');
+  var skipBtn=toolbar.querySelector('._ts-skip-btn');
+  var animPaused=false,animSkipped=false;
+
+  pauseBtn.addEventListener('click',function(e){
+    e.stopPropagation();
+    if(animSkipped)return; // can't pause if already skipped
+    animPaused=!animPaused;
+    document.body.classList.toggle('_ts-animations-paused',animPaused);
+    pauseBtn.classList.toggle('_ts-paused',animPaused);
+    pauseBtn.title=animPaused?'Resume animations':'Pause animations';
+    pauseBtn.innerHTML=animPaused?'&#9654;':'&#9646;&#9646;';
+    // Dispatch event for user code
+    document.dispatchEvent(new CustomEvent('ts:animationstate',{detail:{paused:animPaused,skipped:animSkipped}}));
+  });
+
+  skipBtn.addEventListener('click',function(e){
+    e.stopPropagation();
+    animSkipped=!animSkipped;
+    animPaused=false;
+    document.body.classList.remove('_ts-animations-paused');
+    document.body.classList.toggle('_ts-animations-skipped',animSkipped);
+    pauseBtn.classList.remove('_ts-paused');
+    pauseBtn.innerHTML='&#9646;&#9646;';
+    pauseBtn.title='Pause animations';
+    pauseBtn.disabled=animSkipped;
+    pauseBtn.style.opacity=animSkipped?'0.3':'1';
+    skipBtn.classList.toggle('_ts-active',animSkipped);
+    skipBtn.title=animSkipped?'Restore animations':'Skip animations';
+    // Also stop any running intervals/requestAnimationFrame via event
+    document.dispatchEvent(new CustomEvent('ts:animationstate',{detail:{paused:false,skipped:animSkipped}}));
+  });
 
   // --- Export Menu ---
   var exportBtn=toolbar.querySelector('._ts-export-btn');
