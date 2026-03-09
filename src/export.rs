@@ -57,10 +57,13 @@ pub fn export(
             result?;
         }
 
-        // .html → .pdf (headless Chrome)
+        // .html → .pdf (headless Chrome with print-friendly temp file)
         (PresentationFormat::Html, ExportFormat::Pdf) => {
             let chrome = find_chrome()?;
-            run_chrome_pdf(&chrome, input, &output_path)?;
+            let tmp_html = prepare_html_for_print(input)?;
+            let result = run_chrome_pdf(&chrome, &tmp_html, &output_path);
+            let _ = std::fs::remove_file(&tmp_html);
+            result?;
         }
 
         // .html → .md (pandoc)
@@ -157,6 +160,44 @@ fn preprocess_md_for_pandoc(input: &Path) -> Result<String> {
     }
 
     Ok(output)
+}
+
+/// Creates a print-friendly version of an HTML presentation.
+/// Injects CSS to make all slides visible with page breaks between them.
+fn prepare_html_for_print(input: &Path) -> Result<PathBuf> {
+    let html = std::fs::read_to_string(input)
+        .with_context(|| format!("Failed to read: {}", input.display()))?;
+
+    let print_css = r#"<style>
+/* Print overrides: show all slides, one per page */
+.slide {
+  display: flex !important;
+  position: relative !important;
+  page-break-after: always;
+  break-after: page;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+.slide:last-of-type { page-break-after: auto; }
+/* Hide navigation UI */
+.progress, .nav-hint, ._ts-toolbar, ._ts-jump, ._ts-gallery-overlay, ._ts-export-menu { display: none !important; }
+/* Disable animations */
+* { animation: none !important; transition: none !important; }
+body { overflow: visible !important; }
+@page { size: landscape; margin: 0; }
+</style>"#;
+
+    let modified = if let Some(pos) = html.find("</head>") {
+        format!("{}{}{}", &html[..pos], print_css, &html[pos..])
+    } else {
+        format!("{print_css}{html}")
+    };
+
+    let tmp = temp_path(input, ".print-tmp.html");
+    std::fs::write(&tmp, &modified)
+        .with_context(|| format!("Failed to write temp file: {}", tmp.display()))?;
+    Ok(tmp)
 }
 
 fn default_output_path(input: &Path, format: ExportFormat) -> PathBuf {

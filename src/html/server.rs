@@ -5,6 +5,8 @@ use anyhow::{bail, Context, Result};
 use tiny_http::{Header, Request, Response, Server};
 
 use super::nav_snippet;
+use crate::cli::{ExportFormat, PresentationFormat};
+use crate::export;
 
 /// Serves an HTML presentation file via a local HTTP server and opens the default browser.
 ///
@@ -45,7 +47,7 @@ pub fn serve_html(file_path: &Path, port: u16) -> Result<()> {
 
     // Handle incoming requests until the process is terminated
     for request in server.incoming_requests() {
-        handle_request(request, &base_dir, &file_name);
+        handle_request(request, &base_dir, &file_name, &file_path);
     }
 
     Ok(())
@@ -83,11 +85,17 @@ fn try_bind_server(port: u16) -> Result<(Server, u16)> {
 }
 
 /// Handles a single HTTP request by serving files from the base directory.
-fn handle_request(request: Request, base_dir: &Path, index_file: &str) {
+fn handle_request(request: Request, base_dir: &Path, index_file: &str, source_file: &Path) {
     // Strip query string before decoding the path
     let raw_url = request.url().to_string();
     let path_portion = raw_url.split('?').next().unwrap_or(&raw_url);
     let url_path = percent_decode(path_portion);
+
+    // Handle export API requests
+    if url_path.starts_with("/_api/export/") {
+        handle_export_request(request, source_file, &url_path);
+        return;
+    }
 
     let relative = if url_path == "/" {
         index_file.to_string()
@@ -181,6 +189,81 @@ fn percent_decode(input: &str) -> String {
     }
 
     String::from_utf8_lossy(&result).to_string()
+}
+
+/// Handles export API requests (e.g., `/_api/export/pdf`).
+fn handle_export_request(request: Request, source_file: &Path, url_path: &str) {
+    let format_str = url_path.trim_start_matches("/_api/export/");
+    let export_format = match format_str {
+        "pdf" => ExportFormat::Pdf,
+        "pptx" => ExportFormat::Pptx,
+        "md" => ExportFormat::Md,
+        _ => {
+            let resp = Response::from_string(r#"{"error":"Unknown format. Use: pdf, pptx, md"}"#)
+                .with_status_code(400)
+                .with_header(
+                    Header::from_bytes("Content-Type", "application/json").unwrap(),
+                );
+            let _ = request.respond(resp);
+            return;
+        }
+    };
+
+    let input_format = match source_file
+        .extension()
+        .and_then(|e| e.to_str())
+        .map(|e| e.to_lowercase())
+        .as_deref()
+    {
+        Some("md") => PresentationFormat::Markdown,
+        _ => PresentationFormat::Html,
+    };
+
+    // Generate output to temp dir
+    let ext = format_str;
+    let stem = source_file
+        .file_stem()
+        .unwrap_or_default()
+        .to_string_lossy();
+    let out_path = std::env::temp_dir().join(format!("terminal-slide-export-{stem}.{ext}"));
+
+    eprintln!("Exporting to {ext}...");
+    match export::export(source_file, input_format, export_format, Some(out_path.to_str().unwrap()))
+    {
+        Ok(()) => {
+            match fs::read(&out_path) {
+                Ok(data) => {
+                    let filename = format!("{stem}.{ext}");
+                    let content_type = match ext {
+                        "pdf" => "application/pdf",
+                        "pptx" => "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                        "md" => "text/markdown; charset=utf-8",
+                        _ => "application/octet-stream",
+                    };
+                    let disposition = format!("attachment; filename=\"{filename}\"");
+                    let resp = Response::from_data(data)
+                        .with_header(Header::from_bytes("Content-Type", content_type).unwrap())
+                        .with_header(Header::from_bytes("Content-Disposition", disposition.as_bytes()).unwrap());
+                    let _ = request.respond(resp);
+                    let _ = fs::remove_file(&out_path);
+                }
+                Err(e) => {
+                    let msg = format!(r#"{{"error":"Failed to read export: {e}"}}"#);
+                    let resp = Response::from_string(msg)
+                        .with_status_code(500)
+                        .with_header(Header::from_bytes("Content-Type", "application/json").unwrap());
+                    let _ = request.respond(resp);
+                }
+            }
+        }
+        Err(e) => {
+            let msg = format!(r#"{{"error":"{}"}}"#, e.to_string().replace('"', "'"));
+            let resp = Response::from_string(msg)
+                .with_status_code(500)
+                .with_header(Header::from_bytes("Content-Type", "application/json").unwrap());
+            let _ = request.respond(resp);
+        }
+    }
 }
 
 /// Injects the navigation snippet into HTML content before `</body>`.

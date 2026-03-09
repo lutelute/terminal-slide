@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Math &amp; Algorithms</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0e0;overflow:hidden}
+.slide{display:none;flex-direction:column;justify-content:center;align-items:center;height:100vh;padding:3rem 4rem;position:absolute;top:0;left:0;width:100%}
+.slide.active{display:flex;animation:fadeSlide .35s cubic-bezier(.33,1,.68,1)}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+h1{font-size:2.8rem;color:#00d2ff;margin-bottom:.5rem}
+h2{font-size:2rem;color:#00d2ff;margin-bottom:1.5rem;text-align:center;width:100%}
+h3{font-size:1.4rem;color:#7fdbca;margin-bottom:.8rem}
+p{font-size:1.1rem;line-height:1.7;color:#bbb}
+code{background:#1e1e30;padding:.15em .4em;border-radius:3px;font-family:'Fira Code',monospace;color:#7fdbca;font-size:.95em}
+pre{background:#1e1e30;padding:1rem 1.5rem;border-radius:8px;font-size:.9rem;overflow-x:auto;color:#a0c4ff;font-family:'Fira Code',monospace;line-height:1.6}
+.label{display:inline-block;background:#00d2ff22;color:#00d2ff;padding:.2em .7em;border-radius:4px;font-size:.85rem;margin-bottom:1rem;font-weight:600}
+.progress{position:fixed;bottom:1rem;right:1.5rem;font-size:.85rem;color:#555}
+.nav-hint{position:fixed;bottom:1rem;left:1.5rem;font-size:.8rem;color:#444}
+
+.cols{display:flex;gap:2.5rem;width:100%;max-width:1100px}
+.cols>*{flex:1}
+.card{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:12px;padding:1.5rem;transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-4px);box-shadow:0 8px 24px #00d2ff15}
+.center-content{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.accent-cyan{border-left:3px solid #00d2ff}
+.accent-green{border-left:3px solid #7fdbca}
+.accent-purple{border-left:3px solid #c792ea}
+.accent-orange{border-left:3px solid #f78c6c}
+
+/* Math display */
+.math-block{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:12px;padding:2rem;margin:.8rem 0;text-align:center;font-size:1.3rem}
+.math-block .katex{font-size:1.4em}
+.math-step{background:#1a1a2e;border-left:3px solid #c792ea;padding:1rem 1.5rem;margin:.5rem 0;border-radius:0 8px 8px 0}
+.math-step .step-num{color:#c792ea;font-weight:700;margin-right:.5rem}
+
+/* Table */
+table{border-collapse:collapse;width:100%;max-width:900px;font-size:1rem}
+th{background:#1e1e30;color:#00d2ff;padding:.8rem 1.2rem;text-align:left;border-bottom:2px solid #00d2ff44}
+td{padding:.7rem 1.2rem;border-bottom:1px solid #2a2a4a;color:#ccc}
+tr:hover td{background:#1a1a2e}
+td:first-child{color:#7fdbca;font-family:'Fira Code',monospace;font-weight:600}
+
+/* Mermaid */
+.mermaid{background:#1a1a2e;border-radius:12px;padding:1.5rem;width:100%;max-width:900px;text-align:center}
+.mermaid svg{max-width:100%}
+</style></head><body>
+
+<!-- ========== Slide 1: Title ========== -->
+<div class="slide active">
+  <div class="center-content">
+    <p class="label">PRESENTATION</p>
+    <h1>Math &amp; Algorithms</h1>
+    <p style="font-size:1.3rem;margin-top:1rem;color:#888">Formulas, Proofs, Complexity &amp; Diagrams</p>
+    <p style="margin-top:.5rem;color:#666">Powered by KaTeX &amp; Mermaid.js</p>
+    <p style="margin-top:2rem;color:#555">Press &rarr; to begin</p>
+  </div>
+</div>
+
+<!-- ========== Slide 2: Basic Math ========== -->
+<div class="slide">
+  <h2>Fundamental Formulas</h2>
+  <div class="cols" style="max-width:1000px">
+    <div class="card accent-cyan">
+      <h3>Quadratic Formula</h3>
+      <div class="math-block" id="math-quadratic"></div>
+      <p style="font-size:.9rem;margin-top:.5rem">Solves $ax^2 + bx + c = 0$</p>
+    </div>
+    <div class="card accent-green">
+      <h3>Summation</h3>
+      <div class="math-block" id="math-sum"></div>
+      <p style="font-size:.9rem;margin-top:.5rem">Sum of first $n$ natural numbers</p>
+    </div>
+    <div class="card accent-purple">
+      <h3>Gaussian Integral</h3>
+      <div class="math-block" id="math-integral"></div>
+      <p style="font-size:.9rem;margin-top:.5rem">The Gaussian integral</p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Slide 3: Euler's Identity ========== -->
+<div class="slide">
+  <h2>Proof: Euler's Identity</h2>
+  <div style="width:100%;max-width:800px">
+    <div class="math-block" id="math-euler" style="font-size:1.6rem;margin-bottom:1.5rem;border:2px solid #00d2ff44"></div>
+    <div class="math-step"><span class="step-num">Step 1.</span> Start with Euler's formula: <span id="euler-s1"></span></div>
+    <div class="math-step"><span class="step-num">Step 2.</span> Substitute <span id="euler-s2a"></span>: <span id="euler-s2b"></span></div>
+    <div class="math-step"><span class="step-num">Step 3.</span> Evaluate: <span id="euler-s3a"></span> and <span id="euler-s3b"></span></div>
+    <div class="math-step"><span class="step-num">Step 4.</span> Therefore: <span id="euler-s4a"></span>, which gives <span id="euler-s4b"></span></div>
+    <p style="text-align:center;margin-top:1.5rem;color:#7fdbca;font-size:1rem">&#x25A0; &nbsp;Q.E.D.</p>
+  </div>
+</div>
+
+<!-- ========== Slide 4: Matrix Operations ========== -->
+<div class="slide">
+  <h2>Matrix Operations</h2>
+  <div class="cols" style="max-width:1000px">
+    <div class="card accent-cyan">
+      <h3>Multiplication</h3>
+      <div class="math-block" id="math-matmul"></div>
+    </div>
+    <div class="card accent-orange">
+      <h3>Determinant</h3>
+      <div class="math-block" id="math-det"></div>
+    </div>
+  </div>
+  <div style="max-width:1000px;margin-top:1rem">
+    <div class="card accent-purple" style="text-align:center">
+      <h3>Eigenvalue Equation</h3>
+      <div class="math-block" id="math-eigen"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Slide 5: Big-O Complexity ========== -->
+<div class="slide">
+  <h2>Big-O Complexity Comparison</h2>
+  <table>
+    <tr><th>Complexity</th><th>Name</th><th>Example</th><th>n=1,000</th></tr>
+    <tr><td>O(1)</td><td>Constant</td><td>Hash lookup</td><td>1</td></tr>
+    <tr><td>O(log n)</td><td>Logarithmic</td><td>Binary search</td><td>~10</td></tr>
+    <tr><td>O(n)</td><td>Linear</td><td>Linear search</td><td>1,000</td></tr>
+    <tr><td>O(n log n)</td><td>Linearithmic</td><td>Merge sort</td><td>~10,000</td></tr>
+    <tr><td>O(n&sup2;)</td><td>Quadratic</td><td>Bubble sort</td><td>1,000,000</td></tr>
+    <tr><td>O(2&#x207F;)</td><td>Exponential</td><td>Subset enumeration</td><td style="color:#ff5370">~10&sup3;&sup0;&sup0;</td></tr>
+  </table>
+</div>
+
+<!-- ========== Slide 6: Binary Search ========== -->
+<div class="slide">
+  <h2>Algorithm: Binary Search</h2>
+  <div class="cols" style="max-width:1050px">
+    <div class="card accent-cyan" style="flex:1.3">
+      <h3>Pseudocode</h3>
+      <pre>function binarySearch(arr, target):
+    lo &larr; 0
+    hi &larr; len(arr) - 1
+
+    while lo &le; hi:
+        mid &larr; &lfloor;(lo + hi) / 2&rfloor;
+
+        if arr[mid] == target:
+            return mid
+        else if arr[mid] &lt; target:
+            lo &larr; mid + 1
+        else:
+            hi &larr; mid - 1
+
+    return -1  // not found</pre>
+    </div>
+    <div class="card accent-green">
+      <h3>Complexity</h3>
+      <div class="math-step" style="border-left-color:#00d2ff"><span class="step-num" style="color:#00d2ff">Time</span> <span id="bs-time"></span></div>
+      <div class="math-step" style="border-left-color:#7fdbca"><span class="step-num" style="color:#7fdbca">Space</span> <span id="bs-space"></span></div>
+      <h3 style="margin-top:1.2rem">Invariant</h3>
+      <p style="font-size:.95rem">If <code>target</code> exists in <code>arr</code>, then <span id="bs-inv"></span></p>
+      <h3 style="margin-top:1.2rem">Key Insight</h3>
+      <p style="font-size:.95rem">Each iteration halves the search space: <span id="bs-recur"></span></p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Slide 7: Quicksort ========== -->
+<div class="slide">
+  <h2>Algorithm: Quicksort</h2>
+  <div class="cols" style="max-width:1050px">
+    <div class="card accent-orange" style="flex:1.3">
+      <h3>Pseudocode</h3>
+      <pre>function quicksort(arr, lo, hi):
+    if lo &lt; hi:
+        p &larr; partition(arr, lo, hi)
+        quicksort(arr, lo, p - 1)
+        quicksort(arr, p + 1, hi)
+
+function partition(arr, lo, hi):
+    pivot &larr; arr[hi]
+    i &larr; lo - 1
+    for j &larr; lo to hi - 1:
+        if arr[j] &le; pivot:
+            i &larr; i + 1
+            swap(arr[i], arr[j])
+    swap(arr[i+1], arr[hi])
+    return i + 1</pre>
+    </div>
+    <div class="card accent-purple">
+      <h3>Recurrence</h3>
+      <div class="math-block" id="qs-recur" style="font-size:1.1rem"></div>
+      <h3 style="margin-top:1rem">Complexity</h3>
+      <div class="math-step" style="border-left-color:#7fdbca"><span class="step-num" style="color:#7fdbca">Best / Avg</span> <span id="qs-best"></span></div>
+      <div class="math-step" style="border-left-color:#ff5370"><span class="step-num" style="color:#ff5370">Worst</span> <span id="qs-worst"></span></div>
+      <div class="math-step" style="border-left-color:#00d2ff"><span class="step-num" style="color:#00d2ff">Space</span> <span id="qs-space"></span></div>
+      <h3 style="margin-top:1rem">Master Theorem</h3>
+      <p style="font-size:.9rem">With <span id="qs-master"></span>, by Case 2 of the Master Theorem, we get <span id="qs-result"></span>.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Slide 8: Mermaid Flowchart ========== -->
+<div class="slide">
+  <h2>Algorithm Decision Flow</h2>
+  <div class="mermaid">
+    flowchart TD
+      A[Start: Choose Algorithm] --> B{Data sorted?}
+      B -- Yes --> C{Need insertion?}
+      B -- No --> D{Data size?}
+      C -- Yes --> E[B-Tree / AVL Tree]
+      C -- No --> F[Binary Search]
+      D -- "n < 50" --> G[Insertion Sort]
+      D -- "n < 10,000" --> H[Quicksort]
+      D -- "n >= 10,000" --> I{Stability needed?}
+      I -- Yes --> J[Merge Sort]
+      I -- No --> K[Introsort]
+      style A fill:#00d2ff22,stroke:#00d2ff,color:#e0e0e0
+      style F fill:#7fdbca22,stroke:#7fdbca,color:#e0e0e0
+      style E fill:#7fdbca22,stroke:#7fdbca,color:#e0e0e0
+      style G fill:#c792ea22,stroke:#c792ea,color:#e0e0e0
+      style H fill:#f78c6c22,stroke:#f78c6c,color:#e0e0e0
+      style J fill:#ffcb6b22,stroke:#ffcb6b,color:#e0e0e0
+      style K fill:#ff537022,stroke:#ff5370,color:#e0e0e0
+  </div>
+</div>
+
+<!-- ========== Slide 9: Mermaid Sequence Diagram ========== -->
+<div class="slide">
+  <h2>API Call Flow</h2>
+  <div class="mermaid">
+    sequenceDiagram
+      participant C as Client
+      participant GW as API Gateway
+      participant Auth as Auth Service
+      participant DB as Database
+      participant Cache as Redis Cache
+
+      C->>GW: POST /api/query
+      GW->>Auth: Validate JWT
+      Auth-->>GW: 200 OK (user_id)
+      GW->>Cache: GET cache:query_hash
+      alt Cache Hit
+        Cache-->>GW: Cached result
+        GW-->>C: 200 OK (cached)
+      else Cache Miss
+        Cache-->>GW: null
+        GW->>DB: SELECT * FROM results
+        DB-->>GW: Result set
+        GW->>Cache: SET cache:query_hash
+        GW-->>C: 200 OK (fresh)
+      end
+  </div>
+</div>
+
+<!-- ========== Slide 10: Summary ========== -->
+<div class="slide">
+  <div class="center-content">
+    <h2 style="margin-bottom:2rem">Summary</h2>
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:.8rem 2rem;text-align:left;max-width:700px">
+      <span style="color:#00d2ff;font-weight:600">KaTeX</span><span style="color:#888">Render publication-quality math in the browser</span>
+      <span style="color:#00d2ff;font-weight:600">Formulas</span><span style="color:#888">Quadratic, summation, integrals, matrices</span>
+      <span style="color:#00d2ff;font-weight:600">Proofs</span><span style="color:#888">Step-by-step derivations with Euler's identity</span>
+      <span style="color:#00d2ff;font-weight:600">Complexity</span><span style="color:#888">Big-O comparison table for common algorithms</span>
+      <span style="color:#00d2ff;font-weight:600">Algorithms</span><span style="color:#888">Binary search &amp; quicksort with pseudocode</span>
+      <span style="color:#00d2ff;font-weight:600">Mermaid</span><span style="color:#888">Flowcharts &amp; sequence diagrams from text</span>
+    </div>
+    <p style="margin-top:2.5rem;color:#555">Built with terminal-slide</p>
+  </div>
+</div>
+
+<div class="progress"></div>
+<div class="nav-hint">&larr; &rarr; to navigate</div>
+
+<!-- KaTeX -->
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
+<!-- Mermaid -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+
+<script>
+// ---- Mermaid init ----
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'dark',
+  themeVariables: {
+    primaryColor: '#1a1a2e',
+    primaryTextColor: '#e0e0e0',
+    primaryBorderColor: '#00d2ff',
+    lineColor: '#555',
+    secondaryColor: '#2a2a4a',
+    tertiaryColor: '#1e1e30',
+    fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
+    fontSize: '14px'
+  }
+});
+
+// ---- KaTeX rendering ----
+function renderMath(id, tex, displayMode) {
+  var el = document.getElementById(id);
+  if (el) katex.render(tex, el, { displayMode: displayMode !== false, throwOnError: false });
+}
+
+// Slide 2: Basic math
+renderMath('math-quadratic', 'x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}');
+renderMath('math-sum', '\\sum_{k=1}^{n} k = \\frac{n(n+1)}{2}');
+renderMath('math-integral', '\\int_{-\\infty}^{\\infty} e^{-x^2}\\, dx = \\sqrt{\\pi}');
+
+// Slide 3: Euler's identity
+renderMath('math-euler', 'e^{i\\pi} + 1 = 0');
+renderMath('euler-s1', 'e^{i\\theta} = \\cos\\theta + i\\sin\\theta', false);
+renderMath('euler-s2a', '\\theta = \\pi', false);
+renderMath('euler-s2b', 'e^{i\\pi} = \\cos\\pi + i\\sin\\pi', false);
+renderMath('euler-s3a', '\\cos\\pi = -1', false);
+renderMath('euler-s3b', '\\sin\\pi = 0', false);
+renderMath('euler-s4a', 'e^{i\\pi} = -1 + 0i = -1', false);
+renderMath('euler-s4b', 'e^{i\\pi} + 1 = 0 \\;\\; \\blacksquare', false);
+
+// Slide 4: Matrices
+renderMath('math-matmul', '\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix} \\begin{pmatrix} e & f \\\\ g & h \\end{pmatrix} = \\begin{pmatrix} ae+bg & af+bh \\\\ ce+dg & cf+dh \\end{pmatrix}');
+renderMath('math-det', '\\det(A) = \\begin{vmatrix} a & b \\\\ c & d \\end{vmatrix} = ad - bc');
+renderMath('math-eigen', 'A\\mathbf{v} = \\lambda\\mathbf{v} \\quad \\Longleftrightarrow \\quad \\det(A - \\lambda I) = 0');
+
+// Slide 6: Binary search
+renderMath('bs-time', 'O(\\log n)', false);
+renderMath('bs-space', 'O(1)', false);
+renderMath('bs-inv', 'arr[lo] \\le target \\le arr[hi]', false);
+renderMath('bs-recur', 'T(n) = T(n/2) + O(1)', false);
+
+// Slide 7: Quicksort
+renderMath('qs-recur', 'T(n) = 2\\,T\\!\\left(\\frac{n}{2}\\right) + O(n)');
+renderMath('qs-best', 'O(n \\log n)', false);
+renderMath('qs-worst', 'O(n^2)', false);
+renderMath('qs-space', 'O(\\log n) \\text{ (in-place)}', false);
+renderMath('qs-master', 'a=2,\\; b=2,\\; f(n)=O(n)', false);
+renderMath('qs-result', 'T(n) = O(n \\log n)', false);
+
+// ---- Auto-render for inline $ ... $ ----
+renderMathInElement(document.body, {
+  delimiters: [
+    { left: '$$', right: '$$', display: true },
+    { left: '$', right: '$', display: false }
+  ],
+  throwOnError: false
+});
+
+// ---- Slide navigation ----
+const slides = document.querySelectorAll('.slide'),
+      prog = document.querySelector('.progress');
+let cur = 0, busy = false;
+function go(i) {
+  if (busy || i === cur) return;
+  var next = Math.max(0, Math.min(i, slides.length - 1));
+  if (next === cur) return;
+  busy = true;
+  slides[cur].classList.remove('active');
+  slides[next].style.animation = 'none'; slides[next].offsetHeight; slides[next].style.animation = '';
+  slides[next].classList.add('active');
+  cur = next;
+  prog.textContent = (cur + 1) + ' / ' + slides.length;
+  setTimeout(function(){ busy = false }, 350);
+}
+prog.textContent = '1 / ' + slides.length;
+document.addEventListener('keydown', function(e) {
+  if (['ArrowRight','l','j','n',' '].indexOf(e.key) >= 0) { e.preventDefault(); go(cur + 1); }
+  else if (['ArrowLeft','h','k','p'].indexOf(e.key) >= 0) { e.preventDefault(); go(cur - 1); }
+  else if (e.key === 'g') go(0);
+  else if (e.key === 'G') go(slides.length - 1);
+});
+</script>
+</body></html>

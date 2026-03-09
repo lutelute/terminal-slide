@@ -33,6 +33,13 @@ pub const SNIPPET: &str = r##"
 ._ts-gallery-info h4{color:#e0e0e0;font-size:.9rem;margin:0;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 ._ts-gallery-info p{color:#666;font-size:.75rem;margin:.2rem 0 0}
 
+._ts-export-menu{position:fixed;bottom:3.5rem;left:1.5rem;background:rgba(20,20,35,.95);border:1px solid #333;border-radius:10px;padding:.6rem;display:none;z-index:99999;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+._ts-export-menu.show{display:block;animation:_tsFadeUp .2s ease-out}
+._ts-export-item{display:flex;align-items:center;gap:.6rem;padding:.5rem .8rem;border-radius:6px;cursor:pointer;color:#aaa;font-size:.85rem;transition:all .15s;white-space:nowrap}
+._ts-export-item:hover{background:rgba(0,210,255,.15);color:#fff}
+._ts-export-item span{color:#666;font-size:.75rem}
+._ts-export-item._ts-loading{opacity:.5;pointer-events:none}
+
 @keyframes _tsFadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes _tsFadeIn{from{opacity:0}to{opacity:1}}
 </style>
@@ -99,7 +106,7 @@ pub const SNIPPET: &str = r##"
   // --- Toolbar ---
   var toolbar=document.createElement('div');
   toolbar.className='_ts-toolbar';
-  toolbar.innerHTML='<button class="_ts-btn _ts-counter-btn">1 / '+slides.length+'</button><button class="_ts-btn _ts-grid-btn" title="Gallery view">&#9638;</button>';
+  toolbar.innerHTML='<button class="_ts-btn _ts-counter-btn">1 / '+slides.length+'</button><button class="_ts-btn _ts-grid-btn" title="Gallery view">&#9638;</button><button class="_ts-btn _ts-export-btn" title="Export">&#8615;</button>';
   document.body.appendChild(toolbar);
   var counterBtn=toolbar.querySelector('._ts-counter-btn');
   var gridBtn=toolbar.querySelector('._ts-grid-btn');
@@ -201,9 +208,53 @@ pub const SNIPPET: &str = r##"
   gallery.querySelector('._ts-gallery-close').addEventListener('click',function(e){e.stopPropagation();closeGallery()});
   gridBtn.addEventListener('click',function(e){e.stopPropagation();closeJump();if(galleryOpen)closeGallery();else openGallery()});
 
+  // --- Export Menu ---
+  var exportBtn=toolbar.querySelector('._ts-export-btn');
+  var exportMenu=document.createElement('div');
+  exportMenu.className='_ts-export-menu';
+  exportMenu.innerHTML='<div class="_ts-export-item" data-fmt="pdf">PDF <span>via Chrome/pandoc</span></div><div class="_ts-export-item" data-fmt="pptx">PPTX <span>via pandoc</span></div><div class="_ts-export-item" data-fmt="md">Markdown <span>via pandoc</span></div>';
+  document.body.appendChild(exportMenu);
+  var exportOpen=false;
+  function toggleExport(){
+    exportOpen=!exportOpen;
+    if(exportOpen){exportMenu.classList.add('show');exportBtn.classList.add('_ts-active');closeJump();closeGallery()}
+    else{closeExport()}
+  }
+  function closeExport(){exportOpen=false;exportMenu.classList.remove('show');exportBtn.classList.remove('_ts-active')}
+  exportBtn.addEventListener('click',function(e){e.stopPropagation();toggleExport()});
+  exportMenu.querySelectorAll('._ts-export-item').forEach(function(item){
+    item.addEventListener('click',function(e){
+      e.stopPropagation();
+      var fmt=this.dataset.fmt;
+      var el=this;
+      el.classList.add('_ts-loading');
+      el.textContent='Exporting...';
+      fetch('/_api/export/'+fmt).then(function(r){
+        if(!r.ok)return r.json().then(function(j){throw new Error(j.error||'Export failed')});
+        var cd=r.headers.get('content-disposition')||'';
+        var fn_match=cd.match(/filename="(.+?)"/);
+        var filename=fn_match?fn_match[1]:'export.'+fmt;
+        return r.blob().then(function(b){return{blob:b,filename:filename}});
+      }).then(function(d){
+        var a=document.createElement('a');
+        a.href=URL.createObjectURL(d.blob);
+        a.download=d.filename;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        closeExport();
+      }).catch(function(err){
+        alert('Export error: '+err.message);
+      }).finally(function(){
+        el.classList.remove('_ts-loading');
+        el.innerHTML={'pdf':'PDF <span>via Chrome/pandoc</span>','pptx':'PPTX <span>via pandoc</span>','md':'Markdown <span>via pandoc</span>'}[fmt]||fmt;
+      });
+    });
+  });
+
   // Close on outside click
   document.addEventListener('click',function(e){
     if(jumpOpen&&!jump.contains(e.target)&&!counterBtn.contains(e.target))closeJump();
+    if(exportOpen&&!exportMenu.contains(e.target)&&!exportBtn.contains(e.target))closeExport();
   });
 
   // --- Keep UI in sync ---
