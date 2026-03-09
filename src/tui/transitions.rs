@@ -35,17 +35,17 @@ impl TransitionManager {
     /// Other actions (Quit, Tick, None) are ignored.
     pub fn trigger(&mut self, action: Action) {
         let effect = match action {
-            // Forward navigation: new slide sweeps in from the right
+            // Forward navigation: new slide sweeps in from the left
             Action::NextSlide => Some(fx::slide_in(
-                Motion::RightToLeft,
+                Motion::LeftToRight,
                 10,
                 0,
                 Color::Reset,
                 (300u32, Interpolation::CubicOut),
             )),
-            // Backward navigation: new slide sweeps in from the left
+            // Backward navigation: new slide sweeps in from the right
             Action::PrevSlide => Some(fx::slide_in(
-                Motion::LeftToRight,
+                Motion::RightToLeft,
                 10,
                 0,
                 Color::Reset,
