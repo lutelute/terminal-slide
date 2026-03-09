@@ -1,7 +1,15 @@
 use std::path::Path;
 
 use anyhow::{bail, Result};
-use clap::Parser;
+use clap::{Parser, ValueEnum};
+
+/// Export format for slide presentations.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
+pub enum ExportFormat {
+    Pdf,
+    Pptx,
+    Md,
+}
 
 /// Terminal-based slide presentation tool supporting Markdown and HTML.
 ///
@@ -16,6 +24,14 @@ pub struct Cli {
     /// Port for the local HTTP server (used for HTML presentations)
     #[arg(long, default_value_t = 8234)]
     pub port: u16,
+
+    /// Export to a file instead of presenting (pdf, pptx, md)
+    #[arg(long, value_enum)]
+    pub export: Option<ExportFormat>,
+
+    /// Output file path for export (defaults to input filename with new extension)
+    #[arg(short, long)]
+    pub output: Option<String>,
 }
 
 /// The detected presentation format based on file extension.

@@ -11,6 +11,7 @@ use ratatui::widgets::Paragraph;
 
 mod app;
 mod cli;
+mod export;
 mod html;
 mod markdown;
 mod slide;
@@ -30,6 +31,11 @@ fn main() -> Result<()> {
     let path = Path::new(&args.file);
     if !path.exists() {
         bail!("File not found: {}", args.file);
+    }
+
+    // Export mode: convert and exit
+    if let Some(export_format) = args.export {
+        return export::export(path, format, export_format, args.output.as_deref());
     }
 
     match format {
