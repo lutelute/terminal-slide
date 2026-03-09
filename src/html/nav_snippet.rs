@@ -35,6 +35,7 @@ pub const SNIPPET: &str = r##"
 
 ._ts-btn._ts-paused{color:#ffcb6b;border-color:#ffcb6b55}
 ._ts-btn._ts-paused:hover{background:rgba(255,203,107,.15)}
+.slide.active{animation:none!important}
 body._ts-animations-paused *{animation-play-state:paused!important;transition-duration:0s!important}
 .slide._ts-skip-active,.slide._ts-skip-active *{animation-duration:0s!important;animation-delay:0s!important;transition-duration:0s!important;transition-delay:0s!important}
 
@@ -44,6 +45,7 @@ body._ts-animations-paused *{animation-play-state:paused!important;transition-du
 ._ts-export-item:hover{background:rgba(0,210,255,.15);color:#fff}
 ._ts-export-item span{color:#666;font-size:.75rem}
 ._ts-export-item._ts-loading{opacity:.5;pointer-events:none}
+._ts-export-item._ts-disabled{opacity:.4;pointer-events:none;cursor:default}
 
 @keyframes _tsFadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes _tsFadeIn{from{opacity:0}to{opacity:1}}
@@ -66,15 +68,17 @@ body._ts-animations-paused *{animation-play-state:paused!important;transition-du
     }
   }
 
-  function jumpTo(idx){
+  function jumpTo(idx,dir){
     if(idx<0||idx>=slides.length)return;
     idx=Math.max(0,Math.min(idx,slides.length-1));
     if(idx===_tsCur)return;
+    var fwd=dir?dir==='fwd':idx>_tsCur;
     // Remove skip class from previous slide so it doesn't persist
     slides[_tsCur].classList.remove('_ts-skip-active');
     cleanAllSlides();
     slides[idx].offsetHeight; // force reflow
     slides[idx].style.animation='';
+    slides[idx].style.animationName=fwd?'slideIn':'slideInReverse';
     slides[idx].classList.add('active');
     _tsCur=idx;
     updateUI(idx);
@@ -97,10 +101,10 @@ body._ts-animations-paused *{animation-play-state:paused!important;transition-du
       return;
     }
     var handled=true;
-    if(['ArrowRight','l','j','n',' '].indexOf(e.key)>=0){jumpTo(_tsCur+1)}
-    else if(['ArrowLeft','h','k','p'].indexOf(e.key)>=0){jumpTo(_tsCur-1)}
-    else if(e.key==='g'){jumpTo(0)}
-    else if(e.key==='G'){jumpTo(slides.length-1)}
+    if(['ArrowRight','l','j','n',' '].indexOf(e.key)>=0){jumpTo(_tsCur+1,'fwd')}
+    else if(['ArrowLeft','h','k','p'].indexOf(e.key)>=0){jumpTo(_tsCur-1,'bwd')}
+    else if(e.key==='g'){jumpTo(0,'bwd')}
+    else if(e.key==='G'){jumpTo(slides.length-1,'fwd')}
     else{handled=false}
     if(handled){e.stopImmediatePropagation();e.preventDefault()}
   },true);
@@ -252,7 +256,7 @@ body._ts-animations-paused *{animation-play-state:paused!important;transition-du
   var exportBtn=toolbar.querySelector('._ts-export-btn');
   var exportMenu=document.createElement('div');
   exportMenu.className='_ts-export-menu';
-  exportMenu.innerHTML='<div class="_ts-export-item" data-fmt="pdf">PDF <span>via Chrome/pandoc</span></div><div class="_ts-export-item" data-fmt="pptx">PPTX <span>via pandoc</span></div><div class="_ts-export-item" data-fmt="md">Markdown <span>via pandoc</span></div>';
+  exportMenu.innerHTML='<div class="_ts-export-item" data-fmt="pdf">PDF <span>via Chrome/pandoc</span></div><div class="_ts-export-item" data-fmt="html">HTML <span>self-contained</span></div><div class="_ts-export-item _ts-disabled" data-fmt="pptx">PPTX <span>開発中</span></div><div class="_ts-export-item" data-fmt="md">Markdown <span>via pandoc</span></div>';
   document.body.appendChild(exportMenu);
   var exportOpen=false;
   function toggleExport(){
@@ -286,7 +290,7 @@ body._ts-animations-paused *{animation-play-state:paused!important;transition-du
         alert('Export error: '+err.message);
       }).finally(function(){
         el.classList.remove('_ts-loading');
-        el.innerHTML={'pdf':'PDF <span>via Chrome/pandoc</span>','pptx':'PPTX <span>via pandoc</span>','md':'Markdown <span>via pandoc</span>'}[fmt]||fmt;
+        el.innerHTML={'pdf':'PDF <span>via Chrome/pandoc</span>','html':'HTML <span>self-contained</span>','pptx':'PPTX <span>開発中</span>','md':'Markdown <span>via pandoc</span>'}[fmt]||fmt;
       });
     });
   });

@@ -9,6 +9,7 @@ pub enum ExportFormat {
     Pdf,
     Pptx,
     Md,
+    Html,
 }
 
 /// Terminal-based slide presentation tool supporting Markdown and HTML.

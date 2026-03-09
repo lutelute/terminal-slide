@@ -198,8 +198,9 @@ fn handle_export_request(request: Request, source_file: &Path, url_path: &str) {
         "pdf" => ExportFormat::Pdf,
         "pptx" => ExportFormat::Pptx,
         "md" => ExportFormat::Md,
+        "html" => ExportFormat::Html,
         _ => {
-            let resp = Response::from_string(r#"{"error":"Unknown format. Use: pdf, pptx, md"}"#)
+            let resp = Response::from_string(r#"{"error":"Unknown format. Use: pdf, pptx, md, html"}"#)
                 .with_status_code(400)
                 .with_header(
                     Header::from_bytes("Content-Type", "application/json").unwrap(),
@@ -238,6 +239,7 @@ fn handle_export_request(request: Request, source_file: &Path, url_path: &str) {
                         "pdf" => "application/pdf",
                         "pptx" => "application/vnd.openxmlformats-officedocument.presentationml.presentation",
                         "md" => "text/markdown; charset=utf-8",
+                        "html" => "text/html; charset=utf-8",
                         _ => "application/octet-stream",
                     };
                     let disposition = format!("attachment; filename=\"{filename}\"");

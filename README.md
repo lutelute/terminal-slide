@@ -95,7 +95,7 @@ terminal-slide [OPTIONS] <FILE>
 | Option | Description | Default |
 |--------|-------------|---------|
 | `--port <PORT>` | Port for the local HTTP server (HTML mode) | `8234` |
-| `--export <FORMAT>` | Export instead of presenting (`pdf`, `pptx`, `md`) | — |
+| `--export <FORMAT>` | Export instead of presenting (`pdf`, `pptx`, `md`, `html`) | — |
 | `-o, --output <PATH>` | Output file path for export | auto-generated |
 | `-h, --help` | Print help | — |
 | `-V, --version` | Print version | — |
@@ -111,6 +111,7 @@ terminal-slide slides.html --port 9000  # Custom port
 # Export
 terminal-slide talk.md --export pdf             # MD -> PDF (pandoc beamer)
 terminal-slide talk.md --export pptx            # MD -> PPTX (pandoc)
+terminal-slide talk.md --export html            # MD -> HTML (self-contained)
 terminal-slide slides.html --export pdf         # HTML -> PDF (headless Chrome)
 terminal-slide slides.html --export pptx        # HTML -> PPTX (pandoc)
 terminal-slide slides.html --export md          # HTML -> Markdown (pandoc)
@@ -139,7 +140,7 @@ HTML presentations get an auto-injected toolbar at the bottom-left with these co
 | `▦` | **Gallery** — full-screen thumbnail view of all slides, click to jump |
 | `⏸` | **Pause** — freeze all CSS animations and transitions. Click again to resume |
 | `⏭` | **Skip** — disable all animations entirely. Click again to restore |
-| `⇓` | **Export** — download as PDF, PPTX, or Markdown directly from the browser |
+| `⇓` | **Export** — download as PDF, HTML, or Markdown directly from the browser (PPTX is under development) |
 
 ## Export
 
@@ -149,6 +150,7 @@ Export requires external tools:
 |------------|----------|
 | MD -> PDF | [pandoc](https://pandoc.org/installing.html) + LaTeX (`brew install pandoc basictex`) |
 | MD -> PPTX | [pandoc](https://pandoc.org/installing.html) (`brew install pandoc`) |
+| MD -> HTML | None (built-in, self-contained output using starter template) |
 | HTML -> PDF | Chrome or Chromium (set `CHROME_PATH` env var if not auto-detected) |
 | HTML -> MD | [pandoc](https://pandoc.org/installing.html) |
 | HTML -> PPTX | [pandoc](https://pandoc.org/installing.html) |
@@ -216,6 +218,7 @@ terminal-slide examples/demo.md           # Markdown TUI demo
 terminal-slide examples/demo.html         # HTML browser demo
 terminal-slide examples/gallery.html      # Layout pattern gallery
 terminal-slide examples/interactive.html  # Charts, animations, Python
+terminal-slide examples/interactive.md    # Terminal-friendly version of interactive demo
 terminal-slide examples/math-algo.html    # KaTeX math + Mermaid diagrams
 terminal-slide templates/layouts.html     # 14 layout templates
 ```
@@ -227,6 +230,8 @@ terminal-slide templates/layouts.html     # 14 layout templates
 **`gallery.html`** — Layout patterns: 2-column, 3-column, 2x2 grid, free grid with row/column spans, hero sections, absolute positioning with overlapping elements.
 
 **`interactive.html`** — Dynamic content: Chart.js bar/line/doughnut/radar charts with live data updates, CSS animations (bounce, spin, pulse), animated bar charts, counter animations, typing effects, Pyodide Python execution, Canvas particle animation.
+
+**`interactive.md`** — Terminal-friendly version of the interactive demo. Charts and animations are represented as ASCII art for TUI display. Also serves as an example of MD→HTML export (`--export html`).
 
 **`math-algo.html`** — Academic content: KaTeX-rendered formulas (quadratic formula, Euler's identity, matrix operations), algorithm pseudocode (binary search, quicksort), Big-O complexity comparison table, Mermaid flowcharts and sequence diagrams.
 
@@ -265,7 +270,7 @@ terminal-slide templates/layouts.html     # 14 layout templates
 src/
   main.rs           # Entry point, CLI routing
   cli.rs            # CLI argument parsing (clap)
-  export.rs         # Export to PDF/PPTX/MD
+  export.rs         # Export to PDF/PPTX/MD/HTML
   slide.rs          # Slide data model
   markdown/
     parser.rs       # Markdown -> Slide elements

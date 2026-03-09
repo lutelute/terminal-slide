@@ -5,6 +5,9 @@ use anyhow::{bail, Context, Result};
 
 use crate::cli::{ExportFormat, PresentationFormat};
 
+/// HTML starter template embedded at compile time.
+const HTML_STARTER: &str = include_str!("../templates/starter.html");
+
 /// Exports a presentation file to the specified format.
 pub fn export(
     input: &Path,
@@ -12,9 +15,12 @@ pub fn export(
     export_format: ExportFormat,
     output: Option<&str>,
 ) -> Result<()> {
-    // Validate: md → md is a no-op
+    // Validate no-op conversions
     if input_format == PresentationFormat::Markdown && export_format == ExportFormat::Md {
         bail!("Input is already Markdown. No conversion needed.");
+    }
+    if input_format == PresentationFormat::Html && export_format == ExportFormat::Html {
+        bail!("Input is already HTML. No conversion needed.");
     }
 
     let output_path = match output {
@@ -98,7 +104,16 @@ pub fn export(
             result?;
         }
 
-        (PresentationFormat::Markdown, ExportFormat::Md) => {
+        // .md → .html (template-based conversion)
+        (PresentationFormat::Markdown, ExportFormat::Html) => {
+            let html = md_to_html(input)?;
+            std::fs::write(&output_path, &html)
+                .with_context(|| format!("Failed to write: {}", output_path.display()))?;
+        }
+
+        // No-op cases (already handled above)
+        (PresentationFormat::Markdown, ExportFormat::Md)
+        | (PresentationFormat::Html, ExportFormat::Html) => {
             unreachable!("Already handled above");
         }
     }
@@ -206,6 +221,7 @@ fn default_output_path(input: &Path, format: ExportFormat) -> PathBuf {
         ExportFormat::Pdf => "pdf",
         ExportFormat::Pptx => "pptx",
         ExportFormat::Md => "md",
+        ExportFormat::Html => "html",
     };
     let candidate = input.with_file_name(format!("{stem}.{ext}"));
     // Avoid overwriting the input file or any existing file
@@ -288,6 +304,99 @@ fn find_chrome() -> Result<String> {
          Set CHROME_PATH environment variable or install Chrome/Chromium.\n\
          macOS:   brew install --cask google-chrome"
     )
+}
+
+/// Converts a Markdown presentation to a self-contained HTML file
+/// using the starter template structure.
+///
+/// Splits on `---` separators (respecting code blocks), converts each slide's
+/// Markdown to HTML via pulldown-cmark, and wraps in the full template.
+fn md_to_html(input: &Path) -> Result<String> {
+    use pulldown_cmark::{html as cmark_html, Options, Parser as CmarkParser};
+
+    let content = std::fs::read_to_string(input)
+        .with_context(|| format!("Failed to read: {}", input.display()))?;
+
+    // Split into slides on --- (same logic as markdown::parser::split_slides)
+    let mut slides_raw: Vec<String> = Vec::new();
+    let mut current = String::new();
+    let mut in_code_block = false;
+
+    for line in content.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with("```") || trimmed.starts_with("~~~") {
+            in_code_block = !in_code_block;
+        }
+        if !in_code_block && trimmed == "---" {
+            slides_raw.push(std::mem::take(&mut current));
+        } else {
+            current.push_str(line);
+            current.push('\n');
+        }
+    }
+    slides_raw.push(current);
+
+    // Extract title from the first H1
+    let title = content
+        .lines()
+        .find(|l| l.starts_with("# "))
+        .map(|l| l.trim_start_matches("# ").trim().to_string())
+        .unwrap_or_else(|| "Presentation".to_string());
+
+    // Convert each slide's Markdown to HTML
+    let options = Options::ENABLE_STRIKETHROUGH | Options::ENABLE_TABLES;
+    let mut slides_html = String::new();
+    for (i, slide_md) in slides_raw.iter().enumerate() {
+        let trimmed = slide_md.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+        let parser = CmarkParser::new_ext(trimmed, options);
+        let mut html_body = String::new();
+        cmark_html::push_html(&mut html_body, parser);
+
+        let active = if i == 0 { " active" } else { "" };
+        slides_html.push_str(&format!(
+            "<div class=\"slide{active}\">\n{html_body}</div>\n"
+        ));
+    }
+
+    // Extract CSS + JS structure from starter template
+    // We take everything from <style> to </style> and the navigation <script>
+    let css = extract_between(HTML_STARTER, "<style>", "</style>")
+        .unwrap_or_default();
+    let js = extract_between(HTML_STARTER, "<!-- ── Keyboard Navigation ── -->\n<script>", "</script>")
+        .unwrap_or_default();
+
+    let html = format!(
+        r#"<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{title}</title>
+<style>
+{css}
+</style>
+</head>
+<body>
+{slides_html}
+<div class="progress"></div>
+<script>
+{js}
+</script>
+</body>
+</html>"#
+    );
+
+    Ok(html)
+}
+
+/// Extracts text between two markers (exclusive of markers).
+fn extract_between<'a>(source: &'a str, start: &str, end: &str) -> Option<&'a str> {
+    let start_pos = source.find(start)? + start.len();
+    let end_pos = source[start_pos..].find(end)? + start_pos;
+    Some(&source[start_pos..end_pos])
 }
 
 fn run_chrome_pdf(chrome: &str, input: &Path, output: &Path) -> Result<()> {
