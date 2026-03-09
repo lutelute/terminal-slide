@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>terminal-slide — Present from the terminal</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:#0a0a14;color:#e0e0e0;min-height:100vh;display:flex;flex-direction:column}
+a{color:#00d2ff;text-decoration:none;transition:opacity .2s}
+a:hover{opacity:.8}
+.hero{text-align:center;padding:5rem 2rem 3rem}
+.hero h1{font-size:3.5rem;color:#00d2ff;margin-bottom:.5rem;letter-spacing:-.02em}
+.hero h1 span{color:#7b61ff}
+.hero p{font-size:1.3rem;color:#888;margin-top:.8rem;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.6}
+.badge{display:inline-block;background:#00d2ff22;color:#00d2ff;padding:.3em 1em;border-radius:20px;font-size:.85rem;font-weight:600;margin:.3rem}
+.badge.purple{background:#7b61ff22;color:#7b61ff}
+.section{max-width:1100px;margin:0 auto;padding:2rem}
+.section h2{font-size:1.8rem;color:#00d2ff;margin-bottom:1.5rem;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.2rem}
+.card{background:#12122a;border:1px solid #2a2a4a;border-radius:12px;padding:1.5rem;transition:all .2s;position:relative;overflow:hidden}
+.card:hover{border-color:#00d2ff;transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,210,255,.1)}
+.card h3{color:#e0e0e0;font-size:1.1rem;margin-bottom:.5rem}
+.card p{color:#888;font-size:.9rem;line-height:1.5}
+.card .tag{position:absolute;top:1rem;right:1rem;font-size:.7rem;padding:.15em .5em;border-radius:4px;font-weight:600}
+.tag-math{background:#c792ea22;color:#c792ea}
+.tag-chart{background:#82aaff22;color:#82aaff}
+.tag-code{background:#7fdbca22;color:#7fdbca}
+.tag-layout{background:#c3e88d22;color:#c3e88d}
+.tag-anim{background:#89ddff22;color:#89ddff}
+.tag-theme{background:#ffcb6b22;color:#ffcb6b}
+.install{background:#12122a;border:1px solid #2a2a4a;border-radius:12px;padding:1.5rem;max-width:600px;margin:0 auto;font-family:'Fira Code',monospace;font-size:.95rem;color:#7fdbca}
+.install span{color:#555;user-select:none}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;max-width:800px;margin:0 auto}
+.mode{background:#12122a;border:1px solid #2a2a4a;border-radius:12px;padding:1.5rem;text-align:center}
+.mode h3{color:#00d2ff;font-size:1.3rem;margin-bottom:.5rem}
+.mode p{color:#888;font-size:.95rem}
+.mode .icon{font-size:2.5rem;margin-bottom:.8rem}
+footer{margin-top:auto;padding:2rem;text-align:center;border-top:1px solid #1a1a2e}
+footer p{color:#555;font-size:.85rem}
+.sgnb{display:inline-block;margin-top:.8rem;font-size:.75rem;letter-spacing:.15em;color:#444;font-weight:700;text-transform:uppercase;border:1px solid #333;padding:.3em .8em;border-radius:4px;transition:all .2s}
+.sgnb:hover{color:#00d2ff;border-color:#00d2ff44}
+.links{display:flex;gap:1rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap}
+.btn{display:inline-block;padding:.6rem 1.5rem;border-radius:8px;font-size:.95rem;font-weight:600;transition:all .2s}
+.btn-primary{background:#00d2ff;color:#0a0a14}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+.btn-outline{border:1px solid #2a2a4a;color:#888}
+.btn-outline:hover{border-color:#00d2ff;color:#00d2ff}
+@media(max-width:600px){
+  .hero h1{font-size:2.2rem}
+  .modes{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>terminal<span>-</span>slide</h1>
+  <p>Terminal-based slide presentation tool.<br>Markdown runs in the TUI. HTML runs in the browser.</p>
+  <div style="margin-top:1.5rem">
+    <span class="badge">Rust</span>
+    <span class="badge">Markdown</span>
+    <span class="badge">HTML</span>
+    <span class="badge purple">No config</span>
+  </div>
+  <div class="links">
+    <a href="https://github.com/lutelute/terminal-slide" class="btn btn-primary">GitHub</a>
+    <a href="gallery.html" class="btn btn-outline">Template Gallery</a>
+    <a href="themes.html" class="btn btn-outline">Theme Preview</a>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Two Modes</h2>
+  <div class="modes">
+    <div class="mode">
+      <div class="icon">🖥</div>
+      <h3>Markdown → Terminal</h3>
+      <p>Write slides in Markdown, present directly in the terminal. Syntax highlighting, slide transitions.</p>
+      <div class="install" style="margin-top:1rem;text-align:left;font-size:.85rem">
+        <span>$</span> terminal-slide talk.md
+      </div>
+    </div>
+    <div class="mode">
+      <div class="icon">🌐</div>
+      <h3>HTML → Browser</h3>
+      <p>Full CSS layouts, Chart.js, KaTeX, Mermaid, Pyodide. Navigation UI auto-injected.</p>
+      <div class="install" style="margin-top:1rem;text-align:left;font-size:.85rem">
+        <span>$</span> terminal-slide slides.html
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Install</h2>
+  <div class="install">
+    <span>$</span> cargo install --path .
+  </div>
+</div>
+
+<div class="section">
+  <h2>Template Gallery</h2>
+  <p style="text-align:center;color:#888;margin-bottom:1.5rem">10 categories — copy & paste into your presentation</p>
+  <div class="grid">
+    <a href="gallery.html" class="card">
+      <span class="tag tag-math">KaTeX</span>
+      <h3>数式編</h3>
+      <p>Quadratic formula, Euler's identity, matrix multiplication, proof derivation by induction.</p>
+    </a>
+    <a href="gallery.html" class="card">
+      <span class="tag tag-chart">Chart.js</span>
+      <h3>グラフ編</h3>
+      <p>Bar, line (live update), doughnut, radar charts. Randomize and live data controls.</p>
+    </a>
+    <a href="gallery.html" class="card">
+      <span class="tag tag-code">Code</span>
+      <h3>コード編</h3>
+      <p>Syntax highlighted code blocks with line numbers, highlighted lines, and diff view.</p>
+    </a>
+    <a href="gallery.html" class="card">
+      <span class="tag tag-anim">JS</span>
+      <h3>アニメーション編</h3>
+      <p>Counter animations, animated progress bars, typing effect with sequential reveal.</p>
+    </a>
+    <a href="gallery.html" class="card">
+      <span class="tag tag-layout">CSS</span>
+      <h3>レイアウト &amp; 比較編</h3>
+      <p>2-column, 3-column, card grids, timelines, before/after, pros & cons layouts.</p>
+    </a>
+    <a href="gallery.html" class="card">
+      <span class="tag tag-code">Pyodide</span>
+      <h3>実行 &amp; 図解編</h3>
+      <p>Live Python execution, Mermaid flowcharts and sequence diagrams.</p>
+    </a>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Themes</h2>
+  <p style="text-align:center;color:#888;margin-bottom:1.5rem">6 built-in CSS themes — swap with a single :root block</p>
+  <div class="grid">
+    <a href="themes.html" class="card">
+      <span class="tag tag-theme">Default</span>
+      <h3>Dark / Light / Corporate</h3>
+      <p>Dark navy + cyan, clean white + blue, professional navy + soft blue.</p>
+    </a>
+    <a href="themes.html" class="card">
+      <span class="tag tag-theme">Creative</span>
+      <h3>Neon / Paper / Minimal</h3>
+      <p>Cyberpunk glow, warm sepia + serif, pure black & white Helvetica.</p>
+    </a>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Features</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>Navigation UI</h3>
+      <p>Auto-injected toolbar: slide jump, thumbnail gallery, animation pause/skip, export menu.</p>
+    </div>
+    <div class="card">
+      <h3>Export</h3>
+      <p>PDF (Chrome headless), PPTX (pandoc), Markdown. From CLI or browser toolbar.</p>
+    </div>
+    <div class="card">
+      <h3>Zero Config</h3>
+      <p>No build step, no config files. One command: <code style="background:#1e1e30;color:#7fdbca;padding:.1em .3em;border-radius:3px;font-size:.85em">terminal-slide file</code></p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>MIT License &middot; Built with Rust</p>
+  <a href="https://github.com/lutelute" class="sgnb">SGNB</a>
+</footer>
+
+</body>
+</html>
