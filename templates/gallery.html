@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Template Gallery</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:#0f0f1a;color:#e0e0e0;overflow:hidden}
+.slide{display:none;flex-direction:column;justify-content:center;align-items:center;height:100vh;padding:3rem 4rem;position:absolute;top:0;left:0;width:100%}
+.slide.active{display:flex}
+.slide.out-left{display:flex;animation:slideOutLeft .3s ease-out forwards}
+.slide.out-right{display:flex;animation:slideOutRight .3s ease-out forwards}
+@keyframes slideIn{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInReverse{from{opacity:0;transform:translateX(-60px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideOutLeft{to{opacity:0;transform:translateX(-60px)}}
+@keyframes slideOutRight{to{opacity:0;transform:translateX(60px)}}
+h1{font-size:2.8rem;color:#00d2ff;margin-bottom:.5rem}
+h2{font-size:2rem;color:#00d2ff;margin-bottom:1.2rem;text-align:center;width:100%}
+h3{font-size:1.2rem;color:#7b61ff;margin-bottom:.8rem}
+p,li{font-size:1.1rem;line-height:1.7;color:#bbb}
+ul{list-style:none;text-align:left}
+strong{color:#fff}
+em{color:#888;font-style:italic}
+code{background:#1e1e30;padding:.15em .4em;border-radius:3px;font-family:'Fira Code','JetBrains Mono',monospace;color:#7fdbca;font-size:.9em}
+pre{background:#1e1e30;border:1px solid #2a2a4a;border-radius:8px;padding:1.2rem;text-align:left;font-size:.9rem;overflow-x:auto;margin:.5rem 0;font-family:'Fira Code','JetBrains Mono',monospace;color:#e0e0e0;line-height:1.6}
+.label{display:inline-block;background:#00d2ff22;color:#00d2ff;padding:.2em .7em;border-radius:4px;font-size:.8rem;margin-bottom:1rem;font-weight:600}
+.card{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:10px;padding:1.2rem}
+.cols{display:flex;gap:1.5rem;width:100%;max-width:1100px}
+.cols>*{flex:1}
+.cols-3>*{flex:1}
+.cols-3{display:flex;gap:1.2rem;width:100%;max-width:1100px}
+table{border-collapse:collapse;margin:.5rem 0;font-size:1rem;width:100%}
+th,td{padding:.5rem .8rem;border:1px solid #2a2a4a;text-align:left}
+th{background:#1a1a2e;color:#00d2ff;font-weight:600}
+td{color:#ccc}
+.progress{position:fixed;bottom:1rem;right:1.5rem;font-size:.85rem;color:#555}
+button{background:#00d2ff;color:#0f0f1a;border:none;padding:.5rem 1.2rem;border-radius:6px;font-size:.95rem;cursor:pointer;font-weight:600;transition:opacity .2s}
+button:hover{opacity:.8}
+button:disabled{opacity:.4;cursor:default}
+textarea,pre.output{font-family:'Fira Code',monospace;font-size:.85rem;border-radius:8px;padding:.8rem;width:100%;resize:none}
+textarea{background:#1e1e30;color:#a0c4ff;border:1px solid #2a2a4a;height:100px}
+pre.output{background:#0a0a15;color:#7fdbca;border:1px solid #1a1a2e;min-height:50px;max-height:120px;overflow-y:auto;white-space:pre-wrap}
+.chart-container{width:100%;max-width:480px;position:relative}
+canvas{border-radius:8px}
+
+/* Category label colors */
+.cat-math{background:#c792ea22;color:#c792ea}
+.cat-table{background:#f78c6c22;color:#f78c6c}
+.cat-chart{background:#82aaff22;color:#82aaff}
+.cat-code{background:#7fdbca22;color:#7fdbca}
+.cat-exec{background:#ffcb6b22;color:#ffcb6b}
+.cat-diagram{background:#ff537022;color:#ff5370}
+.cat-anim{background:#89ddff22;color:#89ddff}
+.cat-layout{background:#c3e88d22;color:#c3e88d}
+.cat-timeline{background:#f07c7c22;color:#f07c7c}
+.cat-compare{background:#e2b93d22;color:#e2b93d}
+
+/* Math */
+.katex{font-size:1.3em}
+.math-block{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:10px;padding:1.5rem;margin:.5rem 0;text-align:center}
+.proof-step{display:flex;align-items:flex-start;gap:1rem;margin:.6rem 0;padding:.5rem .8rem;border-left:3px solid #c792ea;background:#1a1a2e;border-radius:0 8px 8px 0}
+.proof-step .step-num{color:#c792ea;font-weight:700;font-size:.85rem;min-width:50px}
+.proof-step .step-body{flex:1}
+
+/* Code */
+.line-num{color:#555;user-select:none;display:inline-block;width:2.5em;text-align:right;margin-right:1em}
+.diff-add{color:#c3e88d;background:rgba(195,232,141,.08)}
+.diff-del{color:#ff5370;background:rgba(255,83,112,.08);text-decoration:line-through}
+.highlight-line{background:rgba(0,210,255,.08);border-left:3px solid #00d2ff;padding-left:calc(1.2rem - 3px)}
+
+/* Animation */
+.bar{height:28px;border-radius:4px;margin:5px 0;transition:width 1s cubic-bezier(.33,1,.68,1);width:0}
+.bar.animate{width:var(--w)}
+.counter{font-size:3.5rem;font-weight:bold;color:#00d2ff;font-variant-numeric:tabular-nums}
+.typing-line{font-size:1rem;color:#7fdbca;margin:3px 0;opacity:0;transform:translateX(-10px);transition:all .3s}
+.typing-line.show{opacity:1;transform:translateX(0)}
+
+/* Timeline */
+.timeline{position:relative;padding-left:2rem;max-width:700px;width:100%}
+.timeline::before{content:'';position:absolute;left:.6rem;top:0;bottom:0;width:2px;background:#2a2a4a}
+.timeline-item{position:relative;margin-bottom:1.5rem;padding-left:1.5rem}
+.timeline-item::before{content:'';position:absolute;left:-1.65rem;top:.4rem;width:12px;height:12px;border-radius:50%;background:#00d2ff;border:2px solid #0f0f1a}
+.timeline-item.done::before{background:#c3e88d}
+.timeline-item.current::before{background:#ffcb6b;box-shadow:0 0 8px rgba(255,203,107,.5)}
+.timeline-item h4{color:#e0e0e0;font-size:1rem;margin-bottom:.2rem}
+.timeline-item p{font-size:.9rem;color:#888;margin:0}
+.timeline-item .date{font-size:.8rem;color:#555;margin-top:.1rem}
+
+/* Compare */
+.compare-card{border-radius:10px;padding:1.2rem;border:1px solid}
+.compare-before{background:#ff537011;border-color:#ff537044}
+.compare-before h3{color:#ff5370}
+.compare-after{background:#c3e88d11;border-color:#c3e88d44}
+.compare-after h3{color:#c3e88d}
+.pro-con-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;width:100%;max-width:900px}
+.pro-item,.con-item{padding:.8rem 1rem;border-radius:8px;font-size:1rem}
+.pro-item{background:#c3e88d11;border-left:3px solid #c3e88d;color:#c3e88d}
+.con-item{background:#ff537011;border-left:3px solid #ff5370;color:#ff5370}
+
+/* Mermaid */
+.mermaid{background:#141422;border-radius:10px;padding:1.5rem;margin:.5rem 0}
+.mermaid svg{max-width:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif!important}
+/* Actor boxes */
+.mermaid .actor{fill:#1e3a52!important;stroke:#4da6ff!important;stroke-width:2px!important;rx:6!important}
+.mermaid text.actor>tspan,.mermaid .actor-man tspan{fill:#fff!important;font-size:15px!important;font-weight:700!important}
+/* Lifelines */
+.mermaid .actor-line{stroke:#3a5a7a!important;stroke-width:1px!important;stroke-dasharray:4,4!important}
+/* Messages */
+.mermaid .messageLine0{stroke:#00d2ff!important;stroke-width:2px!important}
+.mermaid .messageLine1{stroke:#00d2ff!important;stroke-width:2px!important;stroke-dasharray:4,3!important}
+.mermaid .messageText{fill:#fff!important;font-size:14px!important;font-weight:500!important}
+.mermaid .sequenceNumber{fill:#0f0f1a!important}
+/* Arrows */
+.mermaid #arrowhead path,.mermaid #crosshead path,.mermaid marker path{fill:#00d2ff!important;stroke:#00d2ff!important}
+/* Activations */
+.mermaid .activation0,.mermaid .activation1,.mermaid .activation2{fill:#1e3a52!important;stroke:#4da6ff!important;stroke-width:1.5px!important}
+/* Notes */
+.mermaid .note{fill:#2a2a4a!important;stroke:#7b61ff!important;stroke-width:1.5px!important;rx:4!important}
+.mermaid .noteText>tspan{fill:#e0e0e0!important;font-size:13px!important}
+/* Loop/Alt boxes */
+.mermaid .loopText>tspan,.mermaid .labelText>tspan{fill:#c792ea!important;font-size:13px!important;font-weight:600!important}
+.mermaid .loopLine{stroke:#c792ea!important;stroke-width:1.5px!important}
+.mermaid .labelBox{fill:#1a1a2e!important;stroke:#c792ea!important;stroke-width:1.5px!important}
+</style>
+</head>
+<body>
+
+<!-- ==================== TITLE ==================== -->
+<div class="slide active">
+  <p class="label">TEMPLATE GALLERY</p>
+  <h1>Template Collection</h1>
+  <p style="font-size:1.3rem;margin:1rem 0 2rem">10 categories &times; 2 slides = 20 templates</p>
+  <div class="cols-3" style="max-width:800px">
+    <div class="card" style="text-align:center">
+      <p><span class="label cat-math">数式</span></p>
+      <p><span class="label cat-table">表</span></p>
+      <p><span class="label cat-chart">グラフ</span></p>
+      <p><span class="label cat-code">コード</span></p>
+    </div>
+    <div class="card" style="text-align:center">
+      <p><span class="label cat-exec">実行</span></p>
+      <p><span class="label cat-diagram">図解</span></p>
+      <p><span class="label cat-anim">アニメ</span></p>
+    </div>
+    <div class="card" style="text-align:center">
+      <p><span class="label cat-layout">レイアウト</span></p>
+      <p><span class="label cat-timeline">タイムライン</span></p>
+      <p><span class="label cat-compare">比較</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 1. 数式編 (Math) ==================== -->
+<div class="slide">
+  <span class="label cat-math">数式編 1/2</span>
+  <h2>Basic Formulas</h2>
+  <div class="cols">
+    <div class="math-block">
+      <p style="color:#888;font-size:.85rem;margin-bottom:.5rem">Quadratic Formula</p>
+      <div class="katex-render">$$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$</div>
+    </div>
+    <div class="math-block">
+      <p style="color:#888;font-size:.85rem;margin-bottom:.5rem">Euler's Identity</p>
+      <div class="katex-render">$$e^{i\pi} + 1 = 0$$</div>
+    </div>
+  </div>
+  <div class="math-block" style="max-width:1100px;width:100%;margin-top:.5rem">
+    <p style="color:#888;font-size:.85rem;margin-bottom:.5rem">Matrix Multiplication</p>
+    <div class="katex-render">$$\begin{pmatrix} a & b \\ c & d \end{pmatrix} \begin{pmatrix} e \\ f \end{pmatrix} = \begin{pmatrix} ae + bf \\ ce + df \end{pmatrix}$$</div>
+  </div>
+</div>
+
+<div class="slide">
+  <span class="label cat-math">数式編 2/2</span>
+  <h2>Proof Derivation</h2>
+  <div style="max-width:800px;width:100%">
+    <div class="proof-step">
+      <span class="step-num">Given</span>
+      <div class="step-body katex-render">$$\sum_{k=1}^{n} k = \frac{n(n+1)}{2}$$</div>
+    </div>
+    <div class="proof-step">
+      <span class="step-num">Step 1</span>
+      <div class="step-body"><span style="color:#bbb">Base case:</span> <span class="katex-render">$n=1$: $\sum_{k=1}^{1}k = 1 = \frac{1 \cdot 2}{2}$ ✓</span></div>
+    </div>
+    <div class="proof-step">
+      <span class="step-num">Step 2</span>
+      <div class="step-body"><span style="color:#bbb">Inductive hypothesis: Assume true for</span> <span class="katex-render">$n$</span></div>
+    </div>
+    <div class="proof-step">
+      <span class="step-num">Step 3</span>
+      <div class="step-body katex-render">$$\sum_{k=1}^{n+1}k = \frac{n(n+1)}{2} + (n+1) = \frac{(n+1)(n+2)}{2}$$</div>
+    </div>
+    <div class="proof-step">
+      <span class="step-num">QED</span>
+      <div class="step-body" style="color:#c3e88d">By induction, the formula holds for all $n \geq 1$. ∎</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 2. 表・データ編 (Tables) ==================== -->
+<div class="slide">
+  <span class="label cat-table">表・データ編 1/2</span>
+  <h2>Styled Data Table</h2>
+  <div style="max-width:900px;width:100%">
+    <table>
+      <thead>
+        <tr><th>Language</th><th>Type System</th><th>Speed</th><th>Memory Safety</th><th>Ecosystem</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Rust</strong></td><td>Static, strong</td><td style="color:#c3e88d">★★★★★</td><td style="color:#c3e88d">★★★★★</td><td>★★★☆☆</td></tr>
+        <tr><td><strong>Go</strong></td><td>Static, strong</td><td style="color:#c3e88d">★★★★☆</td><td>★★★☆☆</td><td>★★★★☆</td></tr>
+        <tr><td><strong>Python</strong></td><td>Dynamic, strong</td><td style="color:#ff5370">★★☆☆☆</td><td>★★★☆☆</td><td style="color:#c3e88d">★★★★★</td></tr>
+        <tr><td><strong>C++</strong></td><td>Static, weak</td><td style="color:#c3e88d">★★★★★</td><td style="color:#ff5370">★★☆☆☆</td><td>★★★★☆</td></tr>
+        <tr><td><strong>TypeScript</strong></td><td>Static, structural</td><td>★★★☆☆</td><td>★★★☆☆</td><td style="color:#c3e88d">★★★★★</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="slide">
+  <span class="label cat-table">表・データ編 2/2</span>
+  <h2>Status Dashboard</h2>
+  <div style="max-width:900px;width:100%">
+    <table>
+      <thead>
+        <tr><th>Service</th><th>Status</th><th>Uptime</th><th>Response</th><th>Region</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>API Gateway</td><td><span style="color:#c3e88d">● Healthy</span></td><td>99.99%</td><td>12ms</td><td>us-east-1</td></tr>
+        <tr><td>Auth Service</td><td><span style="color:#c3e88d">● Healthy</span></td><td>99.97%</td><td>8ms</td><td>us-east-1</td></tr>
+        <tr><td>Database</td><td><span style="color:#ffcb6b">● Degraded</span></td><td>99.82%</td><td>45ms</td><td>us-west-2</td></tr>
+        <tr><td>Cache</td><td><span style="color:#c3e88d">● Healthy</span></td><td>99.99%</td><td>2ms</td><td>us-east-1</td></tr>
+        <tr><td>Worker Queue</td><td><span style="color:#ff5370">● Down</span></td><td>98.50%</td><td>—</td><td>eu-west-1</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:.8rem;font-size:.9rem;color:#555">Last updated: 2025-03-10 14:30 UTC</p>
+  </div>
+</div>
+
+<!-- ==================== 3. グラフ編 (Charts) ==================== -->
+<div class="slide" id="slide-chart1">
+  <span class="label cat-chart">グラフ編 1/2</span>
+  <h2>Bar & Line Charts</h2>
+  <div class="cols">
+    <div class="card">
+      <h3 style="text-align:center">Monthly Revenue</h3>
+      <div class="chart-container"><canvas id="galleryBarChart"></canvas></div>
+      <div style="text-align:center;margin-top:.5rem"><button onclick="randomizeBar()">Randomize</button></div>
+    </div>
+    <div class="card">
+      <h3 style="text-align:center">CPU Usage (Live)</h3>
+      <div class="chart-container"><canvas id="galleryLineChart"></canvas></div>
+      <div style="text-align:center;margin-top:.5rem"><button id="galLiveBtn" onclick="toggleGalLive()">Start Live</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="slide" id="slide-chart2">
+  <span class="label cat-chart">グラフ編 2/2</span>
+  <h2>Doughnut & Radar Charts</h2>
+  <div class="cols">
+    <div class="card">
+      <h3 style="text-align:center">Language Distribution</h3>
+      <div class="chart-container" style="max-width:320px;margin:0 auto"><canvas id="galleryDoughnut"></canvas></div>
+    </div>
+    <div class="card">
+      <h3 style="text-align:center">Framework Comparison</h3>
+      <div class="chart-container" style="max-width:360px;margin:0 auto"><canvas id="galleryRadar"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 4. コード編 (Code) ==================== -->
+<div class="slide">
+  <span class="label cat-code">コード編 1/2</span>
+  <h2>Syntax Highlight & Line Numbers</h2>
+  <div class="cols" style="max-width:1000px">
+    <div class="card">
+      <h3>Rust — HTTP Server</h3>
+      <pre><span class="line-num">1</span><span style="color:#c792ea">use</span> <span style="color:#82aaff">tiny_http</span>::Server;
+<span class="line-num">2</span>
+<span class="line-num">3</span><span style="color:#c792ea">fn</span> <span style="color:#82aaff">main</span>() {
+<span class="line-num">4</span>    <span style="color:#c792ea">let</span> server = Server::http(<span style="color:#c3e88d">"0.0.0.0:8080"</span>)
+<span class="line-num">5</span>        .unwrap();
+<span class="line-num">6</span>    <span style="color:#c792ea">for</span> req <span style="color:#c792ea">in</span> server.incoming_requests() {
+<span class="line-num">7</span><span class="highlight-line">        req.respond(Response::from_string(<span style="color:#c3e88d">"Hello!"</span>))</span>
+<span class="line-num">8</span>            .unwrap();
+<span class="line-num">9</span>    }
+<span class="line-num">10</span>}</pre>
+    </div>
+    <div class="card">
+      <h3>Python — FastAPI</h3>
+      <pre><span class="line-num">1</span><span style="color:#c792ea">from</span> <span style="color:#82aaff">fastapi</span> <span style="color:#c792ea">import</span> FastAPI
+<span class="line-num">2</span>
+<span class="line-num">3</span>app = FastAPI()
+<span class="line-num">4</span>
+<span class="line-num">5</span><span style="color:#ffcb6b">@app.get</span>(<span style="color:#c3e88d">"/"</span>)
+<span class="line-num">6</span><span style="color:#c792ea">async def</span> <span style="color:#82aaff">root</span>():
+<span class="line-num">7</span><span class="highlight-line">    <span style="color:#c792ea">return</span> {<span style="color:#c3e88d">"message"</span>: <span style="color:#c3e88d">"Hello!"</span>}</span></pre>
+    </div>
+  </div>
+</div>
+
+<div class="slide">
+  <span class="label cat-code">コード編 2/2</span>
+  <h2>Diff View</h2>
+  <div style="max-width:800px;width:100%">
+    <div class="card">
+      <h3>refactor: improve error handling</h3>
+      <pre><span class="line-num">12</span> <span style="color:#c792ea">fn</span> <span style="color:#82aaff">process</span>(input: &amp;str) -> <span style="color:#ffcb6b">Result</span>&lt;Output&gt; {
+<span class="line-num">13</span><span class="diff-del">-    let data = parse(input).unwrap();</span>
+<span class="line-num">13</span><span class="diff-add">+    let data = parse(input)</span>
+<span class="line-num">14</span><span class="diff-add">+        .context("Failed to parse input")?;</span>
+<span class="line-num">15</span>
+<span class="line-num">16</span><span class="diff-del">-    let result = transform(data).unwrap();</span>
+<span class="line-num">16</span><span class="diff-add">+    let result = transform(data)</span>
+<span class="line-num">17</span><span class="diff-add">+        .with_context(|| format!("Transform failed: {}", input))?;</span>
+<span class="line-num">18</span>
+<span class="line-num">19</span>     <span style="color:#c792ea">Ok</span>(result)
+<span class="line-num">20</span> }</pre>
+      <p style="font-size:.85rem;margin-top:.5rem"><span style="color:#c3e88d">+4 additions</span> &nbsp; <span style="color:#ff5370">-2 deletions</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 5. 実行編 (Execution) ==================== -->
+<div class="slide">
+  <span class="label cat-exec">実行編 1/2</span>
+  <h2>Live Python (Pyodide)</h2>
+  <div class="cols" style="max-width:1000px">
+    <div class="card">
+      <h3>Code Editor</h3>
+      <textarea id="galPyCode">import math
+
+# Calculate primes using Sieve of Eratosthenes
+def sieve(n):
+    is_prime = [True] * (n + 1)
+    is_prime[0] = is_prime[1] = False
+    for i in range(2, int(math.sqrt(n)) + 1):
+        if is_prime[i]:
+            for j in range(i*i, n+1, i):
+                is_prime[j] = False
+    return [i for i in range(n+1) if is_prime[i]]
+
+primes = sieve(100)
+print(f"Primes up to 100: {len(primes)} found")
+print(primes)</textarea>
+      <div style="margin-top:.5rem"><button id="galPyBtn" onclick="galRunPy()">Run Python</button></div>
+    </div>
+    <div class="card">
+      <h3>Output</h3>
+      <pre class="output" id="galPyOutput">Click "Run Python" to execute...</pre>
+    </div>
+  </div>
+</div>
+
+<div class="slide">
+  <span class="label cat-exec">実行編 2/2</span>
+  <h2>Interactive I/O Demo</h2>
+  <div class="cols" style="max-width:1000px">
+    <div class="card">
+      <h3>Data Processing</h3>
+      <textarea id="galPyCode2">import json
+
+data = [
+    {"name": "Alice", "score": 92},
+    {"name": "Bob", "score": 85},
+    {"name": "Charlie", "score": 98},
+    {"name": "Diana", "score": 76},
+]
+
+avg = sum(d["score"] for d in data) / len(data)
+top = max(data, key=lambda d: d["score"])
+
+print(f"Average score: {avg:.1f}")
+print(f"Top scorer: {top['name']} ({top['score']})")
+print(f"\nRanking:")
+for i, d in enumerate(sorted(data, key=lambda x: -x["score"]), 1):
+    print(f"  {i}. {d['name']}: {d['score']}")</textarea>
+      <div style="margin-top:.5rem"><button id="galPyBtn2" onclick="galRunPy2()">Run Python</button></div>
+    </div>
+    <div class="card">
+      <h3>Output</h3>
+      <pre class="output" id="galPyOutput2">Click "Run Python" to execute...</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 6. 図解編 (Diagrams) ==================== -->
+<div class="slide">
+  <span class="label cat-diagram">図解編 1/2</span>
+  <h2>Flowchart (Mermaid)</h2>
+  <div class="cols" style="max-width:1000px">
+    <div class="card" style="flex:1.5">
+      <pre class="mermaid">
+graph TD
+    A[Start] --> B{Is authenticated?}
+    B -->|Yes| C[Load Dashboard]
+    B -->|No| D[Show Login Page]
+    D --> E[Enter Credentials]
+    E --> F{Valid?}
+    F -->|Yes| G[Create Session]
+    G --> C
+    F -->|No| H[Show Error]
+    H --> D
+    C --> I[End]
+    style A fill:#00d2ff,color:#0f0f1a
+    style I fill:#c3e88d,color:#0f0f1a
+    style H fill:#ff5370,color:#fff
+      </pre>
+    </div>
+    <div class="card" style="flex:1">
+      <h3>Authentication Flow</h3>
+      <ul style="font-size:.95rem">
+        <li>1. Check session token</li>
+        <li>2. Redirect if unauthenticated</li>
+        <li>3. Validate credentials</li>
+        <li>4. Create session on success</li>
+        <li>5. Show error on failure</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="slide">
+  <span class="label cat-diagram">図解編 2/2</span>
+  <h2>Sequence Diagram</h2>
+  <div style="max-width:1050px;width:100%">
+    <div class="card" style="padding:1.5rem 2rem">
+      <pre class="mermaid" style="font-size:14px">
+sequenceDiagram
+    participant C as Client
+    participant G as API Gateway
+    participant A as Auth Service
+    participant D as Database
+    C->>G: POST /api/login
+    G->>A: Validate credentials
+    A->>D: Query user
+    D-->>A: User record
+    A-->>G: JWT token
+    G-->>C: 200 OK + token
+    Note over C,G: Subsequent requests
+    C->>G: GET /api/data (Bearer token)
+    G->>A: Verify JWT
+    A-->>G: Valid
+    G->>D: Fetch data
+    D-->>G: Results
+    G-->>C: 200 OK + data
+      </pre>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 7. アニメーション編 (Animation) ==================== -->
+<div class="slide" id="slide-gal-anim1">
+  <span class="label cat-anim">アニメーション編 1/2</span>
+  <h2>Counters & Animated Bars</h2>
+  <div class="cols">
+    <div class="card" style="text-align:center">
+      <h3>Key Metrics</h3>
+      <div style="display:flex;gap:2rem;justify-content:center;margin-top:1rem">
+        <div><div class="counter gal-counter" data-target="24891">0</div><p>Users</p></div>
+        <div><div class="counter gal-counter" data-target="1847">0</div><p>Stars</p></div>
+        <div><div class="counter gal-counter" data-target="392">0</div><p>Contributors</p></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Market Share (%)</h3>
+      <div style="margin-top:.5rem">
+        <p style="font-size:.85rem;margin-bottom:2px">React <span style="float:right;color:#00d2ff">42%</span></p>
+        <div class="bar gal-bar" style="--w:42%;background:linear-gradient(90deg,#00d2ff,#0066cc)"></div>
+        <p style="font-size:.85rem;margin-bottom:2px">Vue <span style="float:right;color:#c3e88d">28%</span></p>
+        <div class="bar gal-bar" style="--w:28%;background:linear-gradient(90deg,#c3e88d,#689f38)"></div>
+        <p style="font-size:.85rem;margin-bottom:2px">Angular <span style="float:right;color:#ff5370">18%</span></p>
+        <div class="bar gal-bar" style="--w:18%;background:linear-gradient(90deg,#ff5370,#d32f2f)"></div>
+        <p style="font-size:.85rem;margin-bottom:2px">Svelte <span style="float:right;color:#ffcb6b">12%</span></p>
+        <div class="bar gal-bar" style="--w:12%;background:linear-gradient(90deg,#ffcb6b,#f57c00)"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="slide" id="slide-gal-anim2">
+  <span class="label cat-anim">アニメーション編 2/2</span>
+  <h2>Typing Effect</h2>
+  <div class="card" style="max-width:750px;width:100%">
+    <div id="gal-typing" style="font-family:'Fira Code',monospace;min-height:180px;padding:.5rem"></div>
+  </div>
+</div>
+
+<!-- ==================== 8. レイアウト編 (Layout) ==================== -->
+<div class="slide">
+  <span class="label cat-layout">レイアウト編 1/2</span>
+  <h2>Two Column + Card Grid</h2>
+  <div class="cols" style="max-width:1050px">
+    <div style="flex:1">
+      <div class="card">
+        <h3>Left Panel</h3>
+        <p>Main content area with text, lists, or any element.</p>
+        <ul style="margin-top:.5rem;font-size:.95rem">
+          <li>- Feature overview</li>
+          <li>- Technical details</li>
+          <li>- Architecture notes</li>
+        </ul>
+      </div>
+    </div>
+    <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+      <div class="card" style="text-align:center"><p style="font-size:2rem;color:#00d2ff">12K</p><p style="font-size:.8rem">Downloads</p></div>
+      <div class="card" style="text-align:center"><p style="font-size:2rem;color:#c3e88d">99.9%</p><p style="font-size:.8rem">Uptime</p></div>
+      <div class="card" style="text-align:center"><p style="font-size:2rem;color:#c792ea">48</p><p style="font-size:.8rem">Countries</p></div>
+      <div class="card" style="text-align:center"><p style="font-size:2rem;color:#ffcb6b">4.8★</p><p style="font-size:.8rem">Rating</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="slide">
+  <span class="label cat-layout">レイアウト編 2/2</span>
+  <h2>Three Column Features</h2>
+  <div class="cols-3" style="max-width:1050px">
+    <div class="card" style="text-align:center">
+      <p style="font-size:2.5rem;margin-bottom:.5rem">⚡</p>
+      <h3>Fast</h3>
+      <p style="font-size:.95rem">Sub-millisecond response times with zero-copy architecture.</p>
+    </div>
+    <div class="card" style="text-align:center">
+      <p style="font-size:2.5rem;margin-bottom:.5rem">🔒</p>
+      <h3>Secure</h3>
+      <p style="font-size:.95rem">Memory-safe by default. No null pointers, no data races.</p>
+    </div>
+    <div class="card" style="text-align:center">
+      <p style="font-size:2.5rem;margin-bottom:.5rem">📦</p>
+      <h3>Portable</h3>
+      <p style="font-size:.95rem">Single binary, no runtime. Deploy anywhere.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 9. タイムライン編 (Timeline) ==================== -->
+<div class="slide">
+  <span class="label cat-timeline">タイムライン編 1/2</span>
+  <h2>Project Roadmap</h2>
+  <div class="timeline">
+    <div class="timeline-item done">
+      <h4>Phase 1: Foundation</h4>
+      <p>Core architecture, CLI parsing, Markdown renderer</p>
+      <div class="date">Jan 2025 — <span style="color:#c3e88d">Complete</span></div>
+    </div>
+    <div class="timeline-item done">
+      <h4>Phase 2: HTML Mode</h4>
+      <p>HTTP server, browser presentation, navigation injection</p>
+      <div class="date">Feb 2025 — <span style="color:#c3e88d">Complete</span></div>
+    </div>
+    <div class="timeline-item current">
+      <h4>Phase 3: Export & Templates</h4>
+      <p>PDF/PPTX/MD export, layout templates, theme system</p>
+      <div class="date">Mar 2025 — <span style="color:#ffcb6b">In Progress</span></div>
+    </div>
+    <div class="timeline-item">
+      <h4>Phase 4: Collaboration</h4>
+      <p>Remote control, live sync, speaker notes</p>
+      <div class="date">Q2 2025 — <span style="color:#555">Planned</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="slide">
+  <span class="label cat-timeline">タイムライン編 2/2</span>
+  <h2>Step-by-Step Process</h2>
+  <div style="display:flex;gap:0;max-width:1000px;width:100%;align-items:stretch">
+    <div class="card" style="flex:1;text-align:center;border-radius:10px 0 0 10px;border-right:none;background:#00d2ff11;border-color:#00d2ff44">
+      <p style="font-size:2rem;color:#00d2ff;margin-bottom:.3rem">1</p>
+      <h3 style="color:#00d2ff">Plan</h3>
+      <p style="font-size:.85rem">Define requirements and architecture</p>
+    </div>
+    <div class="card" style="flex:1;text-align:center;border-radius:0;border-right:none;background:#c792ea11;border-color:#c792ea44">
+      <p style="font-size:2rem;color:#c792ea;margin-bottom:.3rem">2</p>
+      <h3 style="color:#c792ea">Build</h3>
+      <p style="font-size:.85rem">Implement features iteratively</p>
+    </div>
+    <div class="card" style="flex:1;text-align:center;border-radius:0;border-right:none;background:#c3e88d11;border-color:#c3e88d44">
+      <p style="font-size:2rem;color:#c3e88d;margin-bottom:.3rem">3</p>
+      <h3 style="color:#c3e88d">Test</h3>
+      <p style="font-size:.85rem">Validate with unit & integration tests</p>
+    </div>
+    <div class="card" style="flex:1;text-align:center;border-radius:0 10px 10px 0;background:#ffcb6b11;border-color:#ffcb6b44">
+      <p style="font-size:2rem;color:#ffcb6b;margin-bottom:.3rem">4</p>
+      <h3 style="color:#ffcb6b">Deploy</h3>
+      <p style="font-size:.85rem">Ship to production with CI/CD</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 10. 比較編 (Comparison) ==================== -->
+<div class="slide">
+  <span class="label cat-compare">比較編 1/2</span>
+  <h2>Before / After</h2>
+  <div class="cols" style="max-width:1000px">
+    <div class="compare-card compare-before">
+      <h3>Before: Manual Deploy</h3>
+      <pre style="border-color:#ff537044;font-size:.85rem"><span style="color:#ff5370">$</span> ssh prod-server
+<span style="color:#ff5370">$</span> cd /var/www/app
+<span style="color:#ff5370">$</span> git pull origin main
+<span style="color:#ff5370">$</span> npm install
+<span style="color:#ff5370">$</span> npm run build
+<span style="color:#ff5370">$</span> pm2 restart all
+<span style="color:#888"># 🙏 Hope nothing breaks...</span></pre>
+      <p style="color:#ff5370;font-size:.9rem;margin-top:.5rem">15 min, error-prone, no rollback</p>
+    </div>
+    <div class="compare-card compare-after">
+      <h3>After: CI/CD Pipeline</h3>
+      <pre style="border-color:#c3e88d44;font-size:.85rem"><span style="color:#c3e88d">$</span> git push origin main
+<span style="color:#888"># ✅ Tests pass</span>
+<span style="color:#888"># ✅ Build succeeds</span>
+<span style="color:#888"># ✅ Deployed to staging</span>
+<span style="color:#888"># ✅ Health check OK</span>
+<span style="color:#888"># ✅ Promoted to production</span>
+<span style="color:#888"># 🔄 Auto-rollback on failure</span></pre>
+      <p style="color:#c3e88d;font-size:.9rem;margin-top:.5rem">2 min, automated, safe rollback</p>
+    </div>
+  </div>
+</div>
+
+<div class="slide">
+  <span class="label cat-compare">比較編 2/2</span>
+  <h2>Pros & Cons</h2>
+  <h3 style="text-align:center;margin-bottom:1rem;color:#00d2ff">Microservices Architecture</h3>
+  <div class="pro-con-grid">
+    <div class="pro-item">✓ Independent deployment per service</div>
+    <div class="con-item">✗ Network latency between services</div>
+    <div class="pro-item">✓ Technology flexibility per team</div>
+    <div class="con-item">✗ Complex distributed debugging</div>
+    <div class="pro-item">✓ Horizontal scaling of hot services</div>
+    <div class="con-item">✗ Data consistency challenges</div>
+    <div class="pro-item">✓ Fault isolation — one crash ≠ all down</div>
+    <div class="con-item">✗ Infrastructure overhead (K8s, mesh)</div>
+  </div>
+</div>
+
+<div class="progress"></div>
+
+<script>
+// ===== Navigation =====
+var slides=document.querySelectorAll('.slide');
+var prog=document.querySelector('.progress');
+var cur=0,busy=false;
+function go(i,dir){
+  if(busy||i===cur)return;
+  var next=Math.max(0,Math.min(i,slides.length-1));
+  if(next===cur)return;
+  busy=true;
+  var fwd=dir==='fwd';
+  var old=slides[cur],nu=slides[next];
+  old.classList.remove('active');
+  old.classList.add(fwd?'out-left':'out-right');
+  nu.style.animation='none';nu.offsetHeight;nu.style.animation='';
+  nu.classList.add('active');
+  nu.style.animationName=fwd?'slideIn':'slideInReverse';
+  setTimeout(function(){old.classList.remove('out-left','out-right');nu.style.animationName='';busy=false},300);
+  cur=next;
+  prog.textContent=(cur+1)+' / '+slides.length;
+  onSlideEnter(cur);
+}
+prog.textContent='1 / '+slides.length;
+document.addEventListener('keydown',function(e){
+  if(e.target.tagName==='TEXTAREA')return;
+  if(['ArrowRight','l','j','n',' '].indexOf(e.key)>=0){e.preventDefault();go(cur+1,'fwd')}
+  else if(['ArrowLeft','h','k','p'].indexOf(e.key)>=0){e.preventDefault();go(cur-1,'bwd')}
+  else if(e.key==='g')go(0,'bwd');
+  else if(e.key==='G')go(slides.length-1,'fwd');
+});
+
+// ===== Slide Enter Hooks =====
+function onSlideEnter(idx){
+  var slide=slides[idx];
+  if(slide.id==='slide-gal-anim1'){
+    slide.querySelectorAll('.gal-counter').forEach(galAnimateCounter);
+    slide.querySelectorAll('.gal-bar').forEach(function(b){b.classList.remove('animate')});
+    setTimeout(function(){slide.querySelectorAll('.gal-bar').forEach(function(b){b.classList.add('animate')})},100);
+  }
+  if(slide.id==='slide-gal-anim2'){galStartTyping()}
+  if(slide.id==='slide-chart1'){initGalCharts1()}
+  if(slide.id==='slide-chart2'){initGalCharts2()}
+}
+window.onSlideEnter=onSlideEnter;
+
+// ===== Skip support =====
+document.addEventListener('ts:animationskip',function(e){
+  var idx=e.detail.index,slide=slides[idx];
+  if(!slide)return;
+  if(slide.id==='slide-gal-anim1'){
+    slide.querySelectorAll('.gal-counter').forEach(function(el){
+      el.textContent=parseInt(el.dataset.target).toLocaleString();
+    });
+    slide.querySelectorAll('.gal-bar').forEach(function(b){b.classList.add('animate')});
+  }
+  if(slide.id==='slide-gal-anim2'){
+    var c=document.getElementById('gal-typing');c.innerHTML='';
+    galTypingLines.forEach(function(l){
+      var d=document.createElement('div');d.className='typing-line show';
+      d.style.color=l.color;d.textContent=l.text;c.appendChild(d);
+    });
+  }
+});
+
+// ===== Charts =====
+var galBarChart,galLineChart,galLiveInterval;
+function initGalCharts1(){
+  if(galBarChart)return;
+  var ctx1=document.getElementById('galleryBarChart');
+  if(!ctx1)return;
+  galBarChart=new Chart(ctx1,{type:'bar',data:{labels:['Jan','Feb','Mar','Apr','May','Jun'],datasets:[{label:'Revenue ($K)',data:[42,55,68,81,73,95],backgroundColor:'rgba(0,210,255,0.6)',borderColor:'#00d2ff',borderWidth:1,borderRadius:4}]},options:{responsive:true,plugins:{legend:{labels:{color:'#888'}}},scales:{x:{ticks:{color:'#666'},grid:{color:'#1a1a2e'}},y:{ticks:{color:'#666'},grid:{color:'#1a1a2e'}}}}});
+  var ctx2=document.getElementById('galleryLineChart');
+  if(!ctx2)return;
+  galLineChart=new Chart(ctx2,{type:'line',data:{labels:['0s','1s','2s','3s','4s'],datasets:[{label:'CPU %',data:[30,45,38,52,41],borderColor:'#7fdbca',backgroundColor:'rgba(127,219,202,0.1)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#7fdbca'}]},options:{responsive:true,animation:{duration:500},plugins:{legend:{labels:{color:'#888'}}},scales:{x:{ticks:{color:'#666'},grid:{color:'#1a1a2e'}},y:{min:0,max:100,ticks:{color:'#666'},grid:{color:'#1a1a2e'}}}}});
+}
+function randomizeBar(){if(!galBarChart)return;galBarChart.data.datasets[0].data=galBarChart.data.datasets[0].data.map(function(){return Math.floor(Math.random()*100)+20});galBarChart.update()}
+function toggleGalLive(){
+  var btn=document.getElementById('galLiveBtn');
+  if(galLiveInterval){clearInterval(galLiveInterval);galLiveInterval=null;btn.textContent='Start Live';return}
+  btn.textContent='Stop Live';var t=5;
+  galLiveInterval=setInterval(function(){if(!galLineChart)return;t++;galLineChart.data.labels.push(t+'s');galLineChart.data.datasets[0].data.push(Math.floor(Math.random()*60)+20);if(galLineChart.data.labels.length>15){galLineChart.data.labels.shift();galLineChart.data.datasets[0].data.shift()}galLineChart.update()},1000);
+}
+var galDoughnut,galRadar;
+function initGalCharts2(){
+  if(galDoughnut)return;
+  var ctx=document.getElementById('galleryDoughnut');
+  if(!ctx)return;
+  galDoughnut=new Chart(ctx,{type:'doughnut',data:{labels:['Rust','Python','TypeScript','Go'],datasets:[{data:[35,30,25,10],backgroundColor:['#00d2ff','#7fdbca','#c792ea','#f78c6c'],borderColor:'#1a1a2e',borderWidth:2}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#888',padding:12}}}}});
+  var ctx2=document.getElementById('galleryRadar');
+  if(!ctx2)return;
+  galRadar=new Chart(ctx2,{type:'radar',data:{labels:['Speed','Safety','Ecosystem','Learning','Community'],datasets:[{label:'Rust',data:[95,98,70,40,75],borderColor:'#00d2ff',backgroundColor:'rgba(0,210,255,0.15)',pointBackgroundColor:'#00d2ff'},{label:'Python',data:[40,50,95,90,95],borderColor:'#7fdbca',backgroundColor:'rgba(127,219,202,0.15)',pointBackgroundColor:'#7fdbca'}]},options:{responsive:true,scales:{r:{grid:{color:'#2a2a4a'},angleLines:{color:'#2a2a4a'},pointLabels:{color:'#888'},ticks:{display:false}}},plugins:{legend:{labels:{color:'#888'}}}}});
+}
+
+// ===== Counter Animation =====
+function galAnimateCounter(el){
+  var target=parseInt(el.dataset.target);
+  var duration=2000,start=performance.now();
+  el.textContent='0';
+  function step(now){
+    var p=Math.min((now-start)/duration,1);
+    var eased=1-Math.pow(1-p,3);
+    el.textContent=Math.floor(target*eased).toLocaleString();
+    if(p<1)requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// ===== Typing Effect =====
+var galTypingLines=[
+  {text:'$ cargo build --release',color:'#7fdbca',delay:0},
+  {text:'   Compiling terminal-slide v0.1.0',color:'#888',delay:600},
+  {text:'    Finished release [optimized] in 8.2s',color:'#7fdbca',delay:1200},
+  {text:'$ terminal-slide slides.html',color:'#7fdbca',delay:2000},
+  {text:'  Serving: slides.html',color:'#82aaff',delay:2600},
+  {text:'  Server running at: http://localhost:8234',color:'#82aaff',delay:3000},
+  {text:'  Press Ctrl+C to stop',color:'#888',delay:3400},
+  {text:'',color:'transparent',delay:3800},
+  {text:'  ✓ Browser opened automatically',color:'#c3e88d',delay:4200}
+];
+function galStartTyping(){
+  var c=document.getElementById('gal-typing');c.innerHTML='';
+  galTypingLines.forEach(function(l){
+    setTimeout(function(){
+      var d=document.createElement('div');d.className='typing-line';
+      d.style.color=l.color;d.textContent=l.text;c.appendChild(d);
+      requestAnimationFrame(function(){d.classList.add('show')});
+    },l.delay);
+  });
+}
+
+// ===== Pyodide =====
+var galPyodide=null;
+async function galRunPy(){
+  var btn=document.getElementById('galPyBtn'),out=document.getElementById('galPyOutput'),code=document.getElementById('galPyCode').value;
+  btn.disabled=true;btn.textContent='Loading...';
+  try{
+    if(!galPyodide){out.textContent='Loading Pyodide...';galPyodide=await loadPyodide()}
+    btn.textContent='Running...';
+    galPyodide.runPython('import io,sys;sys.stdout=io.StringIO()');
+    galPyodide.runPython(code);
+    out.textContent=galPyodide.runPython('sys.stdout.getvalue()')||'(no output)';
+  }catch(e){out.textContent='Error: '+e.message}
+  btn.disabled=false;btn.textContent='Run Python';
+}
+async function galRunPy2(){
+  var btn=document.getElementById('galPyBtn2'),out=document.getElementById('galPyOutput2'),code=document.getElementById('galPyCode2').value;
+  btn.disabled=true;btn.textContent='Loading...';
+  try{
+    if(!galPyodide){out.textContent='Loading Pyodide...';galPyodide=await loadPyodide()}
+    btn.textContent='Running...';
+    galPyodide.runPython('import io,sys;sys.stdout=io.StringIO()');
+    galPyodide.runPython(code);
+    out.textContent=galPyodide.runPython('sys.stdout.getvalue()')||'(no output)';
+  }catch(e){out.textContent='Error: '+e.message}
+  btn.disabled=false;btn.textContent='Run Python';
+}
+
+// ===== Init =====
+window.addEventListener('load',function(){
+  // KaTeX auto-render
+  if(typeof renderMathInElement==='function'){
+    renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  }
+  // Mermaid
+  if(typeof mermaid!=='undefined'){
+    mermaid.initialize({startOnLoad:true,theme:'dark',themeVariables:{
+      primaryColor:'#243447',primaryTextColor:'#ffffff',primaryBorderColor:'#4da6ff',
+      lineColor:'#4da6ff',secondaryColor:'#2a2a4a',tertiaryColor:'#1a1a2e',
+      noteBkgColor:'#2a2a4a',noteTextColor:'#e0e0e0',noteBorderColor:'#4da6ff',
+      actorBkg:'#243447',actorBorder:'#4da6ff',actorTextColor:'#ffffff',actorLineColor:'#4da6ff',
+      signalColor:'#e0e0e0',signalTextColor:'#ffffff',
+      activationBkgColor:'#344d65',activationBorderColor:'#4da6ff',
+      sequenceNumberColor:'#ffffff',
+      labelBoxBkgColor:'#243447',labelBoxBorderColor:'#4da6ff',labelTextColor:'#e0e0e0',
+      loopTextColor:'#e0e0e0',
+      fontSize:'15px'
+    }});
+  }
+});
+</script>
+</body>
+</html>

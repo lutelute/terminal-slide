@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Theme Preview</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0f0f1a; color: #e0e0e0; overflow: hidden; }
+.slide { display: none; flex-direction: column; justify-content: center; align-items: center; height: 100vh; padding: 4rem; text-align: center; position: absolute; top: 0; left: 0; width: 100%; }
+.slide.active { display: flex; }
+.slide.out-left  { display: flex; animation: slideOutLeft .3s ease-out forwards; }
+.slide.out-right { display: flex; animation: slideOutRight .3s ease-out forwards; }
+@keyframes slideIn        { from { opacity:0; transform:translateX(60px) } to { opacity:1; transform:translateX(0) } }
+@keyframes slideInReverse { from { opacity:0; transform:translateX(-60px)} to { opacity:1; transform:translateX(0) } }
+@keyframes slideOutLeft   { to   { opacity:0; transform:translateX(-60px) } }
+@keyframes slideOutRight  { to   { opacity:0; transform:translateX(60px)  } }
+h1 { font-size: 2.8rem; margin-bottom: 0.8rem; border-bottom: 2px solid; padding-bottom: 0.5rem; }
+h2 { font-size: 2rem; margin-bottom: 1.2rem; }
+h3 { font-size: 1.2rem; margin-bottom: 1rem; }
+p, li { font-size: 1.2rem; line-height: 1.8; }
+ul { list-style: none; text-align: left; }
+code { padding: 0.15em 0.4em; border-radius: 4px; font-size: 0.9em; }
+pre { border-radius: 6px; padding: 1.2rem; text-align: left; font-size: 0.95rem; margin: 1rem 0; overflow-x: auto; border: 1px solid; }
+pre code { background: none; padding: 0; }
+.label { display: inline-block; padding: 0.15em 0.6em; border-radius: 4px; font-size: 0.8em; font-weight: 600; margin-bottom: 1.5rem; }
+.card { border-radius: 8px; padding: 1.2rem; margin: 0.5rem 0; border: 1px solid; }
+.cols { display: flex; gap: 2rem; width: 100%; max-width: 900px; }
+.cols > * { flex: 1; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: 1rem; }
+th, td { padding: 0.5rem 0.8rem; border: 1px solid; text-align: left; }
+.progress { position: fixed; bottom: 1rem; right: 1.5rem; font-size: 0.9rem; color: #888; }
+
+/* ===== Theme 1: Dark ===== */
+.theme-dark { --bg:#0f0f1a;--text:#e0e0e0;--accent:#00d2ff;--accent2:#7b61ff;--card-bg:#1a1a2e;--card-border:#2a2a4a;--code-bg:#1e1e2e;--code-text:#00d2ff;--muted:#888; }
+/* ===== Theme 2: Light ===== */
+.theme-light { --bg:#ffffff;--text:#1a1a2e;--accent:#0066cc;--accent2:#5a3d8a;--card-bg:#f5f5f7;--card-border:#d1d1d6;--code-bg:#f0f0f5;--code-text:#0066cc;--muted:#6b7280; }
+/* ===== Theme 3: Corporate ===== */
+.theme-corporate { --bg:#1b2838;--text:#e8eaed;--accent:#4da6ff;--accent2:#82b1ff;--card-bg:#243447;--card-border:#344d65;--code-bg:#1e2d3d;--code-text:#82b1ff;--muted:#8899aa; }
+/* ===== Theme 4: Neon ===== */
+.theme-neon { --bg:#000000;--text:#e0e0e0;--accent:#39ff14;--accent2:#ff00ff;--card-bg:#111111;--card-border:#333333;--code-bg:#0a0a0a;--code-text:#39ff14;--muted:#777; }
+.theme-neon h1 { text-shadow: 0 0 10px var(--accent); }
+.theme-neon h3 { text-shadow: 0 0 6px var(--accent2); }
+.theme-neon .card { box-shadow: 0 0 8px rgba(57,255,20,0.15); border-color: var(--accent); }
+.theme-neon .label { text-shadow: 0 0 4px var(--accent2); }
+/* ===== Theme 5: Paper ===== */
+.theme-paper { --bg:#faf6f0;--text:#3c3836;--accent:#b16286;--accent2:#458588;--card-bg:#f2ece4;--card-border:#d5cec4;--code-bg:#ede8e0;--code-text:#9d0006;--muted:#7c6f64;font-family:Georgia,'Times New Roman',serif; }
+/* ===== Theme 6: Minimal ===== */
+.theme-minimal { --bg:#ffffff;--text:#111111;--accent:#111111;--accent2:#555555;--card-bg:#f8f8f8;--card-border:#e0e0e0;--code-bg:#f4f4f4;--code-text:#333333;--muted:#999999;font-family:'Helvetica Neue',Arial,sans-serif; }
+.theme-minimal h1 { border-bottom-width: 1px; }
+
+/* Apply theme variables */
+.slide { background: var(--bg); color: var(--text); }
+.slide h1, .slide h2 { color: var(--accent); border-color: var(--accent); }
+.slide h3 { color: var(--accent2); }
+.slide code { background: var(--code-bg); color: var(--code-text); }
+.slide pre { background: var(--code-bg); border-color: var(--card-border); }
+.slide .card { background: var(--card-bg); border-color: var(--card-border); }
+.slide .label { background: var(--accent); color: var(--bg); }
+.slide th { background: var(--card-bg); color: var(--accent); }
+.slide th, .slide td { border-color: var(--card-border); }
+.slide strong { color: var(--accent); }
+.slide em { color: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- ===== Slide 1: Dark ===== -->
+<div class="slide active theme-dark">
+  <span class="label">THEME 1 / 6</span>
+  <h1>Dark Theme</h1>
+  <p style="margin-bottom:1.5rem">Default theme — dark background with <strong>cyan accent</strong></p>
+  <div class="cols">
+    <div class="card">
+      <h3>Features</h3>
+      <ul>
+        <li>Deep navy background</li>
+        <li><code>--ts-accent: #00d2ff</code></li>
+        <li>Purple secondary <em>(#7b61ff)</em></li>
+      </ul>
+    </div>
+    <div class="card">
+      <pre><code>fn main() {
+    println!("Dark theme");
+    // Cyan code highlighting
+}</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Slide 2: Light ===== -->
+<div class="slide theme-light">
+  <span class="label">THEME 2 / 6</span>
+  <h1>Light Theme</h1>
+  <p style="margin-bottom:1.5rem">Clean white background with <strong>blue accent</strong></p>
+  <div class="cols">
+    <div class="card">
+      <h3>Features</h3>
+      <ul>
+        <li>White background</li>
+        <li><code>--ts-accent: #0066cc</code></li>
+        <li>Purple secondary <em>(#5a3d8a)</em></li>
+      </ul>
+    </div>
+    <div class="card">
+      <pre><code>fn main() {
+    println!("Light theme");
+    // Great for bright rooms
+}</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Slide 3: Corporate ===== -->
+<div class="slide theme-corporate">
+  <span class="label">THEME 3 / 6</span>
+  <h1>Corporate Theme</h1>
+  <p style="margin-bottom:1.5rem">Professional navy with <strong>soft blue accent</strong></p>
+  <div class="cols">
+    <div class="card">
+      <h3>Features</h3>
+      <ul>
+        <li>Deep navy background</li>
+        <li><code>--ts-accent: #4da6ff</code></li>
+        <li>Light blue secondary <em>(#82b1ff)</em></li>
+      </ul>
+    </div>
+    <div class="card">
+      <pre><code>fn main() {
+    println!("Corporate theme");
+    // Business presentations
+}</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Slide 4: Neon ===== -->
+<div class="slide theme-neon">
+  <span class="label">THEME 4 / 6</span>
+  <h1>Neon Theme</h1>
+  <p style="margin-bottom:1.5rem">Black background with <strong>glowing green</strong> and <span style="color:#ff00ff">magenta</span></p>
+  <div class="cols">
+    <div class="card">
+      <h3>Features</h3>
+      <ul>
+        <li>Pure black background</li>
+        <li><code>--ts-accent: #39ff14</code></li>
+        <li>Glow text-shadow effects</li>
+      </ul>
+    </div>
+    <div class="card">
+      <pre><code>fn main() {
+    println!("Neon theme");
+    // Cyberpunk vibes
+}</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Slide 5: Paper ===== -->
+<div class="slide theme-paper">
+  <span class="label">THEME 5 / 6</span>
+  <h1>Paper Theme</h1>
+  <p style="margin-bottom:1.5rem">Warm sepia with <strong>rose accent</strong> and serif typography</p>
+  <div class="cols">
+    <div class="card">
+      <h3>Features</h3>
+      <ul>
+        <li>Warm cream background</li>
+        <li><code>--ts-accent: #b16286</code></li>
+        <li>Georgia serif font <em>(academic feel)</em></li>
+      </ul>
+    </div>
+    <div class="card">
+      <pre><code>fn main() {
+    println!("Paper theme");
+    // Academic & literary
+}</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Slide 6: Minimal ===== -->
+<div class="slide theme-minimal">
+  <span class="label">THEME 6 / 6</span>
+  <h1>Minimal Theme</h1>
+  <p style="margin-bottom:1.5rem">Pure black and white — <strong>zero distraction</strong></p>
+  <div class="cols">
+    <div class="card">
+      <h3>Features</h3>
+      <ul>
+        <li>White background</li>
+        <li><code>--ts-accent: #111111</code></li>
+        <li>Helvetica Neue <em>(clean sans-serif)</em></li>
+      </ul>
+    </div>
+    <div class="card">
+      <pre><code>fn main() {
+    println!("Minimal theme");
+    // Content-first design
+}</code></pre>
+    </div>
+  </div>
+</div>
+
+<div class="progress"></div>
+<script>
+const slides = document.querySelectorAll('.slide');
+const progress = document.querySelector('.progress');
+let current = 0, animating = false;
+function go(i, dir) {
+  if (animating || i === current) return;
+  const next = Math.max(0, Math.min(i, slides.length - 1));
+  if (next === current) return;
+  animating = true;
+  const old = slides[current], nu = slides[next];
+  const fwd = dir === 'fwd';
+  old.classList.remove('active');
+  old.classList.add(fwd ? 'out-left' : 'out-right');
+  nu.style.animation = 'none'; nu.offsetHeight; nu.style.animation = '';
+  nu.classList.add('active');
+  nu.style.animationName = fwd ? 'slideIn' : 'slideInReverse';
+  setTimeout(() => { old.classList.remove('out-left','out-right'); nu.style.animationName = ''; animating = false; }, 300);
+  current = next;
+  progress.textContent = (current + 1) + ' / ' + slides.length;
+}
+progress.textContent = '1 / ' + slides.length;
+document.addEventListener('keydown', e => {
+  if (['ArrowRight','l','j','n',' '].includes(e.key)) go(current + 1, 'fwd');
+  else if (['ArrowLeft','h','k','p'].includes(e.key)) go(current - 1, 'bwd');
+  else if (e.key === 'g') go(0, 'bwd');
+  else if (e.key === 'G') go(slides.length - 1, 'fwd');
+});
+</script>
+</body>
+</html>
