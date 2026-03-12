@@ -248,6 +248,10 @@ terminal-slide [OPTIONS] <FILE>
 | Speed to create | Fast | Moderate |
 | Best for | Quick/internal talks | Rich/external presentations |
 
+## Known Issues
+
+- Slide content may overflow horizontally on smaller viewports ([#2](https://github.com/lutelute/terminal-slide/issues/2))
+
 ## Contributing
 
 Contributions are welcome! Feel free to open issues and pull requests.
