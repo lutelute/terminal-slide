@@ -397,18 +397,16 @@ for i, d in enumerate(sorted(data, key=lambda x: -x["score"]), 1):
 <div class="slide">
   <span class="label cat-diagram">図解編 1/2</span>
   <h2>Flowchart (Mermaid)</h2>
-  <div class="cols" style="max-width:1000px">
-    <div class="card" style="flex:1.5">
-      <pre class="mermaid">flowchart TD
-A[Start] --> B{Is authenticated?}
-B -->|Yes| C[Load Dashboard]
-B -->|No| D[Show Login Page]
+  <div style="max-width:1100px;width:100%">
+    <div class="card" style="padding:1.5rem 2rem">
+      <pre class="mermaid">flowchart LR
+A[Start] --> B{Authenticated?}
+B -->|Yes| C[Dashboard]
+B -->|No| D[Login Page]
 D --> E[Enter Credentials]
 E --> F{Valid?}
-F -->|Yes| G[Create Session]
-G --> C
-F -->|No| H[Show Error]
-H --> D
+F -->|Yes| G[Create Session] --> C
+F -->|No| H[Show Error] --> D
 C --> I[End]
 classDef startNode fill:#00d2ff,color:#0f0f1a
 classDef endNode fill:#c3e88d,color:#0f0f1a
@@ -416,16 +414,6 @@ classDef errorNode fill:#ff5370,color:#fff
 class A startNode
 class I endNode
 class H errorNode</pre>
-    </div>
-    <div class="card" style="flex:1">
-      <h3>Authentication Flow</h3>
-      <ul style="font-size:.95rem">
-        <li>1. Check session token</li>
-        <li>2. Redirect if unauthenticated</li>
-        <li>3. Validate credentials</li>
-        <li>4. Create session on success</li>
-        <li>5. Show error on failure</li>
-      </ul>
     </div>
   </div>
 </div>
