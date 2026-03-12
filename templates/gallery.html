@@ -400,7 +400,7 @@ for i, d in enumerate(sorted(data, key=lambda x: -x["score"]), 1):
   <div class="cols" style="max-width:1000px">
     <div class="card" style="flex:1.5">
       <pre class="mermaid">
-graph TD
+flowchart TD
     A[Start] --> B{Is authenticated?}
     B -->|Yes| C[Load Dashboard]
     B -->|No| D[Show Login Page]

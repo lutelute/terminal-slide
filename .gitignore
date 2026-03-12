@@ -1,6 +1,9 @@
 # Build artifacts
 target/
 
+# Node modules (used for GIF recording scripts only)
+node_modules/
+
 # Auto Claude data directory
 .auto-claude/
 

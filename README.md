@@ -80,14 +80,15 @@ terminal-slide talk.md
 
 ### HTML Mode (Browser)
 
-Best for rich presentations with charts, math, diagrams, and interactive content. Starts a local server and opens the browser.
+Best for rich presentations with charts, math, diagrams, and interactive content. Starts a local server and opens the browser with auto-injected navigation.
 
 ```bash
 terminal-slide presentation.html
 ```
 
-<details>
-<summary>HTML mode auto-injects a navigation toolbar</summary>
+<p align="center">
+  <img src="assets/web-mode.gif" alt="HTML mode demo" width="720">
+</p>
 
 | Button | Function |
 |--------|----------|
@@ -97,9 +98,15 @@ terminal-slide presentation.html
 | `⏭` | Skip all animations |
 | `⇓` | Export (PDF, HTML, Markdown) |
 
-</details>
-
 HTML mode supports any JS library via CDN: [Chart.js](https://www.chartjs.org/), [KaTeX](https://katex.org/), [Mermaid](https://mermaid.js.org/), [Pyodide](https://pyodide.org/), D3, Three.js, etc.
+
+### Gallery View
+
+Click `▦` to see all slides as thumbnails. Jump to any slide instantly.
+
+<p align="center">
+  <img src="assets/gallery.gif" alt="Gallery view demo" width="720">
+</p>
 
 ## Export
 
@@ -143,7 +150,7 @@ Works in both modes.
 | Last slide | `G` |
 | Quit | `q` `Esc` `Ctrl+C` |
 
-## Templates & Themes
+## Templates
 
 Ready-to-use templates in `templates/`:
 
@@ -152,9 +159,45 @@ cp templates/starter.html my-talk.html   # Dark theme starter
 terminal-slide my-talk.html
 ```
 
-**Layout Patterns** (`templates/layouts.html`) — 14 patterns: Title, Two Column, Three Column, Code Showcase, Timeline, Stats Grid, Comparison, Quote, and more.
+### Layout Patterns
 
-**Color Themes** (`templates/themes/`) — 6 CSS themes with swappable custom properties:
+14 copy-paste layout patterns: Title, Two Column, Three Column, Code Showcase, Timeline, Stats Grid, Comparison, Quote, and more.
+
+<p align="center">
+  <img src="assets/templates.gif" alt="Layout templates demo" width="720">
+</p>
+
+### Math & Algorithms
+
+KaTeX formulas, algorithm pseudocode, Big-O comparison, Mermaid flowcharts.
+
+<p align="center">
+  <img src="assets/math.gif" alt="Math & algorithms demo" width="720">
+</p>
+
+### Code & Syntax Highlighting
+
+Multi-language code blocks, diff views, terminal-style output.
+
+<p align="center">
+  <img src="assets/code.gif" alt="Code showcase demo" width="720">
+</p>
+
+### Interactive & Charts
+
+Chart.js graphs, CSS animations, live Python (Pyodide), Canvas particle effects.
+
+<p align="center">
+  <img src="assets/interactive.gif" alt="Interactive demo" width="720">
+</p>
+
+## Themes
+
+6 CSS themes with swappable custom properties:
+
+<p align="center">
+  <img src="assets/themes.gif" alt="Theme switching demo" width="720">
+</p>
 
 | Theme | Style |
 |-------|-------|
@@ -231,5 +274,5 @@ Contributions are welcome! Feel free to open issues and pull requests.
 ---
 
 <p align="center">
-  <sub>GIF demos recorded with <a href="https://github.com/charmbracelet/vhs">VHS</a></sub>
+  <sub>Terminal GIFs recorded with <a href="https://github.com/charmbracelet/vhs">VHS</a> / Browser GIFs recorded with <a href="https://playwright.dev/">Playwright</a> + <a href="https://ffmpeg.org/">FFmpeg</a></sub>
 </p>
