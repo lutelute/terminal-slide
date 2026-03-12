@@ -1,82 +1,181 @@
-# terminal-slide
+<h1 align="center">terminal-slide</h1>
 
-Terminal-based slide presentation tool supporting Markdown and HTML.
+<p align="center">
+  <strong>Present slides from the terminal — Markdown or HTML, zero config.</strong>
+</p>
 
-Markdown slides run in the terminal (TUI). HTML slides are served via a local HTTP server and opened in the browser with auto-injected navigation UI.
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
+  <a href="https://www.rust-lang.org/"><img src="https://img.shields.io/badge/rust-2021-orange.svg" alt="Rust 2021"></a>
+  <a href="https://github.com/lutelute/terminal-slide"><img src="https://img.shields.io/github/stars/lutelute/terminal-slide?style=social" alt="GitHub Stars"></a>
+</p>
+
+<p align="center">
+  <img src="assets/demo.gif" alt="terminal-slide demo" width="720">
+</p>
+
+---
+
+## Features
+
+- **Markdown → Terminal** — TUI presentation with syntax highlighting and slide transitions
+- **HTML → Browser** — Serve locally with auto-injected navigation, animation controls, and export UI
+- **Export** — PDF, HTML, PPTX, Markdown via CLI or browser toolbar
+- **Templates** — 14 layout patterns, 6 color themes, 2 starter templates
+- **Zero config** — One command, no build step, no config files
 
 ## Install
 
 ```bash
+# From source
+git clone https://github.com/lutelute/terminal-slide.git
+cd terminal-slide
 cargo install --path .
 ```
 
-Requires Rust toolchain. After install, `terminal-slide` is available as a CLI command.
+> Requires [Rust toolchain](https://rustup.rs/).
 
 ## Quick Start
 
 ```bash
-# Present Markdown slides in the terminal
+# Markdown slides in the terminal
 terminal-slide slides.md
 
-# Present HTML slides in the browser
+# HTML slides in the browser
 terminal-slide presentation.html
 ```
 
-That's it. No config files, no build step.
-
-## Two Modes
-
-### Markdown Mode (terminal)
-
-Best for quick internal talks and technical LTs. Runs entirely in the terminal.
-
-```bash
-terminal-slide slides.md
-```
-
-Write slides separated by `---`:
+Write Markdown slides separated by `---`:
 
 ```markdown
-# Title Slide
+# My Talk
 
-Welcome to my talk
+Welcome!
 
 ---
 
-## Second Slide
+## Agenda
 
-- Point 1
-- Point 2
-- **Bold** and *italic* supported
+- Topic 1
+- Topic 2
 
 ---
 
 ## Code
 
-\```rust
-fn main() {
-    println!("Hello!");
-}
-\```
+```python
+print("Hello, world!")
+```
 ```
 
-Supported elements: headings (H1-H6), bold, italic, inline code, code blocks with syntax highlighting, bullet lists, numbered lists, horizontal rules.
+## Two Modes
 
-### HTML Mode (browser)
+### Markdown Mode (Terminal)
 
-Best for rich presentations with custom layouts, charts, animations, and interactive content.
+Best for quick talks and technical LTs. Runs entirely in the terminal with syntax highlighting, bold/italic, tables, and slide transition animations.
+
+```bash
+terminal-slide talk.md
+```
+
+### HTML Mode (Browser)
+
+Best for rich presentations with charts, math, diagrams, and interactive content. Starts a local server and opens the browser.
 
 ```bash
 terminal-slide presentation.html
 ```
 
-The server starts on `localhost:8234` (configurable with `--port`) and opens the default browser. A navigation toolbar is automatically injected into every HTML presentation.
+<details>
+<summary>HTML mode auto-injects a navigation toolbar</summary>
 
-HTML mode supports:
-- Any CSS layout (flexbox, grid, absolute positioning)
-- JavaScript libraries via CDN (Chart.js, KaTeX, Mermaid, D3, Three.js, etc.)
-- Interactive elements (buttons, forms, live Python via Pyodide)
-- CSS and JS animations
+| Button | Function |
+|--------|----------|
+| `1 / N` | Slide jump — click to open numbered grid |
+| `▦` | Gallery — full-screen thumbnail view |
+| `⏸` | Pause CSS animations |
+| `⏭` | Skip all animations |
+| `⇓` | Export (PDF, HTML, Markdown) |
+
+</details>
+
+HTML mode supports any JS library via CDN: [Chart.js](https://www.chartjs.org/), [KaTeX](https://katex.org/), [Mermaid](https://mermaid.js.org/), [Pyodide](https://pyodide.org/), D3, Three.js, etc.
+
+## Export
+
+<p align="center">
+  <img src="assets/export.gif" alt="Export demo" width="720">
+</p>
+
+```bash
+terminal-slide talk.md --export pdf             # MD → PDF (pandoc + beamer)
+terminal-slide talk.md --export html            # MD → HTML (self-contained)
+terminal-slide talk.md --export pptx            # MD → PPTX
+terminal-slide slides.html --export pdf         # HTML → PDF (headless Chrome)
+terminal-slide slides.html --export md          # HTML → Markdown
+terminal-slide talk.md --export pdf -o out.pdf  # Custom output path
+```
+
+Also available from the browser toolbar (⇓ button) in HTML mode.
+
+<details>
+<summary>External tool requirements</summary>
+
+| Conversion | Requires |
+|------------|----------|
+| MD → PDF | [pandoc](https://pandoc.org/) + LaTeX (`brew install pandoc basictex`) |
+| MD → PPTX | [pandoc](https://pandoc.org/) |
+| MD → HTML | None (built-in) |
+| HTML → PDF | Chrome or Chromium (auto-detected, or set `CHROME_PATH`) |
+| HTML → MD/PPTX | [pandoc](https://pandoc.org/) |
+
+</details>
+
+## Keyboard Shortcuts
+
+Works in both modes.
+
+| Action | Keys |
+|--------|------|
+| Next slide | `→` `l` `j` `n` `Space` |
+| Previous slide | `←` `h` `k` `p` |
+| First slide | `g` |
+| Last slide | `G` |
+| Quit | `q` `Esc` `Ctrl+C` |
+
+## Templates & Themes
+
+Ready-to-use templates in `templates/`:
+
+```bash
+cp templates/starter.html my-talk.html   # Dark theme starter
+terminal-slide my-talk.html
+```
+
+**Layout Patterns** (`templates/layouts.html`) — 14 patterns: Title, Two Column, Three Column, Code Showcase, Timeline, Stats Grid, Comparison, Quote, and more.
+
+**Color Themes** (`templates/themes/`) — 6 CSS themes with swappable custom properties:
+
+| Theme | Style |
+|-------|-------|
+| `dark.css` | Dark background, cyan accent (default) |
+| `light.css` | White background, blue accent |
+| `corporate.css` | Navy, professional |
+| `neon.css` | Black, green + magenta glow |
+| `paper.css` | Warm sepia, serif typography |
+| `minimal.css` | Black and white |
+
+> Preview: `terminal-slide templates/layouts.html` / [Live gallery](https://lutelute.github.io/terminal-slide/)
+
+## Examples
+
+```bash
+terminal-slide examples/demo.md           # Basic TUI demo
+terminal-slide examples/demo.html         # Browser demo
+terminal-slide examples/gallery.html      # Layout gallery (14 patterns)
+terminal-slide examples/interactive.html  # Charts, animations, Python
+terminal-slide examples/math-algo.html    # KaTeX + Mermaid diagrams
+```
 
 ## CLI Reference
 
@@ -84,208 +183,37 @@ HTML mode supports:
 terminal-slide [OPTIONS] <FILE>
 ```
 
-### Arguments
-
-| Argument | Description |
-|----------|-------------|
-| `<FILE>` | Path to `.md`, `.html`, or `.htm` file |
-
-### Options
-
 | Option | Description | Default |
 |--------|-------------|---------|
-| `--port <PORT>` | Port for the local HTTP server (HTML mode) | `8234` |
-| `--export <FORMAT>` | Export instead of presenting (`pdf`, `pptx`, `md`, `html`) | — |
-| `-o, --output <PATH>` | Output file path for export | auto-generated |
+| `<FILE>` | Path to `.md` or `.html` file | (required) |
+| `--port <PORT>` | HTTP server port (HTML mode) | `8234` |
+| `--export <FMT>` | Export: `pdf`, `pptx`, `md`, `html` | — |
+| `-o, --output <PATH>` | Output file path | auto |
 | `-h, --help` | Print help | — |
 | `-V, --version` | Print version | — |
-
-### CLI Examples
-
-```bash
-# Present
-terminal-slide talk.md                  # Terminal TUI
-terminal-slide slides.html              # Browser
-terminal-slide slides.html --port 9000  # Custom port
-
-# Export
-terminal-slide talk.md --export pdf             # MD -> PDF (pandoc beamer)
-terminal-slide talk.md --export pptx            # MD -> PPTX (pandoc)
-terminal-slide talk.md --export html            # MD -> HTML (self-contained)
-terminal-slide slides.html --export pdf         # HTML -> PDF (headless Chrome)
-terminal-slide slides.html --export pptx        # HTML -> PPTX (pandoc)
-terminal-slide slides.html --export md          # HTML -> Markdown (pandoc)
-terminal-slide talk.md --export pdf -o out.pdf  # Custom output path
-```
-
-## Keyboard Shortcuts
-
-Works in both Markdown (terminal) and HTML (browser) modes.
-
-| Action | Keys |
-|--------|------|
-| Next slide | `Right` `l` `j` `n` `Space` |
-| Previous slide | `Left` `h` `k` `p` |
-| First slide | `g` |
-| Last slide | `G` |
-| Quit | `q` `Esc` `Ctrl+C` |
-
-## Navigation UI (HTML Mode)
-
-HTML presentations get an auto-injected toolbar at the bottom-left with these controls:
-
-| Button | Function |
-|--------|----------|
-| `1 / N` | **Slide jump** — click to open a numbered grid, click any number to jump |
-| `▦` | **Gallery** — full-screen thumbnail view of all slides, click to jump |
-| `⏸` | **Pause** — freeze all CSS animations and transitions. Click again to resume |
-| `⏭` | **Skip** — disable all animations entirely. Click again to restore |
-| `⇓` | **Export** — download as PDF, HTML, or Markdown directly from the browser (PPTX is under development) |
-
-## Export
-
-Export requires external tools:
-
-| Conversion | Requires |
-|------------|----------|
-| MD -> PDF | [pandoc](https://pandoc.org/installing.html) + LaTeX (`brew install pandoc basictex`) |
-| MD -> PPTX | [pandoc](https://pandoc.org/installing.html) (`brew install pandoc`) |
-| MD -> HTML | None (built-in, self-contained output using starter template) |
-| HTML -> PDF | Chrome or Chromium (set `CHROME_PATH` env var if not auto-detected) |
-| HTML -> MD | [pandoc](https://pandoc.org/installing.html) |
-| HTML -> PPTX | [pandoc](https://pandoc.org/installing.html) |
-
-Export is available both from the CLI (`--export`) and from the browser toolbar (⇓ button).
-
-## Templates
-
-Ready-to-use templates are in the `templates/` directory.
-
-### Starter Templates
-
-Copy and start editing:
-
-```bash
-cp templates/starter.html my-talk.html       # Dark theme
-cp templates/starter-light.html my-talk.html  # Light theme
-terminal-slide my-talk.html
-```
-
-Each starter includes 3 slides (Title, Content, Thank You) with all base CSS and keyboard navigation.
-
-### Layout Patterns
-
-`templates/layouts.html` contains 14 copy-paste layout patterns:
-
-| Layout | Description |
-|--------|-------------|
-| Title | Centered title + subtitle + author |
-| Section Divider | Big heading for section breaks |
-| Text + Bullets | Standard content slide |
-| Two Column | Equal 1:1 flex layout |
-| Wide + Narrow | 2:1 ratio with sidebar |
-| Three Column | Three equal cards |
-| Code Showcase | Large syntax-highlighted code block |
-| Image + Text | Side-by-side media layout |
-| Quote | Centered blockquote with attribution |
-| Comparison | Before/After with colored headers |
-| Timeline | Vertical timeline with accent dots |
-| Stats | Big numbers with labels |
-| Grid Cards | 3x2 CSS grid |
-| Hero + Details | Full-width banner + bottom row |
-
-Preview them: `terminal-slide templates/layouts.html`
-
-### Color Themes
-
-Six CSS theme files in `templates/themes/`:
-
-| Theme | File | Style |
-|-------|------|-------|
-| Dark | `dark.css` | Dark background, cyan accent (default) |
-| Light | `light.css` | White background, blue accent |
-| Corporate | `corporate.css` | Navy, professional |
-| Neon | `neon.css` | Black, green + magenta glow |
-| Paper | `paper.css` | Warm sepia, serif typography |
-| Minimal | `minimal.css` | Black and white, clean |
-
-All themes use the same CSS custom properties (`--ts-bg`, `--ts-text`, `--ts-accent`, etc.) so they're swappable. To use a theme, copy its properties into your HTML's `<style>` block or link the CSS file.
-
-## Examples
-
-```bash
-terminal-slide examples/demo.md           # Markdown TUI demo
-terminal-slide examples/demo.html         # HTML browser demo
-terminal-slide examples/gallery.html      # Layout pattern gallery
-terminal-slide examples/interactive.html  # Charts, animations, Python
-terminal-slide examples/interactive.md    # Terminal-friendly version of interactive demo
-terminal-slide examples/math-algo.html    # KaTeX math + Mermaid diagrams
-terminal-slide templates/layouts.html     # 14 layout templates
-```
-
-### What Each Example Demonstrates
-
-**`demo.md`** / **`demo.html`** — Basic features: headings, bullets, code blocks, text formatting, keyboard shortcuts table.
-
-**`gallery.html`** — Layout patterns: 2-column, 3-column, 2x2 grid, free grid with row/column spans, hero sections, absolute positioning with overlapping elements.
-
-**`interactive.html`** — Dynamic content: Chart.js bar/line/doughnut/radar charts with live data updates, CSS animations (bounce, spin, pulse), animated bar charts, counter animations, typing effects, Pyodide Python execution, Canvas particle animation.
-
-**`interactive.md`** — Terminal-friendly version of the interactive demo. Charts and animations are represented as ASCII art for TUI display. Also serves as an example of MD→HTML export (`--export html`).
-
-**`math-algo.html`** — Academic content: KaTeX-rendered formulas (quadratic formula, Euler's identity, matrix operations), algorithm pseudocode (binary search, quicksort), Big-O complexity comparison table, Mermaid flowcharts and sequence diagrams.
-
-## Use Cases
-
-**Quick internal talk** — Write a `.md` file, run `terminal-slide talk.md`, present from the terminal. No browser, no setup.
-
-**Technical LT / lightning talk** — Markdown mode with syntax-highlighted code blocks. Stay in the terminal where your audience expects you.
-
-**Conference presentation** — Use HTML mode with custom layouts, Chart.js graphs, and KaTeX math. Export to PDF for backup.
-
-**Lecture / tutorial** — Math formulas via KaTeX, algorithm flowcharts via Mermaid, live Python execution via Pyodide.
-
-**Team demo** — Interactive charts with live data, split layouts for before/after comparisons. Export to PPTX for stakeholders who want slides.
-
-**Documentation walkthrough** — Code showcase layouts with syntax highlighting. Present directly, then export to PDF for archival.
 
 ## Markdown vs HTML
 
 | | Markdown (`.md`) | HTML (`.html`) |
 |---|---|---|
 | Display | Terminal (TUI) | Browser |
-| Layout | Single column, centered | Fully customizable (CSS) |
-| Code | Syntax highlighted | Syntax highlighted |
-| Charts | No | Yes (Chart.js, D3, etc.) |
-| Math | No | Yes (KaTeX) |
-| Diagrams | No | Yes (Mermaid) |
-| Animations | Slide transitions only | CSS/JS, pause/skip controls |
-| Interactive | No | Yes (JS, Pyodide, etc.) |
+| Layout | Single column | Fully customizable (CSS) |
+| Code highlighting | Yes | Yes |
+| Charts / Math / Diagrams | — | Chart.js, KaTeX, Mermaid |
+| Animations | Slide transitions | CSS/JS + pause/skip |
+| Interactive | — | JS, Pyodide, etc. |
 | Speed to create | Fast | Moderate |
-| Best for | Quick talks, internal | Rich presentations, external |
+| Best for | Quick/internal talks | Rich/external presentations |
 
-## Project Structure
+## Contributing
 
-```
-src/
-  main.rs           # Entry point, CLI routing
-  cli.rs            # CLI argument parsing (clap)
-  export.rs         # Export to PDF/PPTX/MD/HTML
-  slide.rs          # Slide data model
-  markdown/
-    parser.rs       # Markdown -> Slide elements
-    renderer.rs     # Slide -> ratatui widgets
-  html/
-    server.rs       # HTTP server with nav injection
-    nav_snippet.rs  # Injected navigation UI (JS+CSS)
-  tui/
-    terminal.rs     # Terminal setup/teardown
-    event.rs        # Keyboard event handling
-    transitions.rs  # tachyonfx slide animations
-  app.rs            # Application state
-examples/           # Demo presentations
-templates/          # Starter templates and themes
-```
+Contributions are welcome! Feel free to open issues and pull requests.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## Built With
 
@@ -298,4 +226,10 @@ templates/          # Starter templates and themes
 
 ## License
 
-MIT
+[MIT](LICENSE)
+
+---
+
+<p align="center">
+  <sub>GIF demos recorded with <a href="https://github.com/charmbracelet/vhs">VHS</a></sub>
+</p>
