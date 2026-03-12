@@ -13,8 +13,8 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:#0f0f1a;color:#e0e0e0;overflow:hidden}
-.slide{display:none;flex-direction:column;justify-content:center;align-items:center;height:100vh;padding:3rem 4rem;position:absolute;top:0;left:0;width:100%}
-.slide.active{display:flex}
+.slide{display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;padding:3rem 4rem;position:absolute;top:0;left:0;width:100%;visibility:hidden;pointer-events:none}
+.slide.active{visibility:visible;pointer-events:auto}
 .slide.out-left{display:flex;animation:slideOutLeft .3s ease-out forwards}
 .slide.out-right{display:flex;animation:slideOutRight .3s ease-out forwards}
 @keyframes slideIn{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
@@ -399,22 +399,23 @@ for i, d in enumerate(sorted(data, key=lambda x: -x["score"]), 1):
   <h2>Flowchart (Mermaid)</h2>
   <div class="cols" style="max-width:1000px">
     <div class="card" style="flex:1.5">
-      <pre class="mermaid">
-flowchart TD
-    A[Start] --> B{Is authenticated?}
-    B -->|Yes| C[Load Dashboard]
-    B -->|No| D[Show Login Page]
-    D --> E[Enter Credentials]
-    E --> F{Valid?}
-    F -->|Yes| G[Create Session]
-    G --> C
-    F -->|No| H[Show Error]
-    H --> D
-    C --> I[End]
-    style A fill:#00d2ff,color:#0f0f1a
-    style I fill:#c3e88d,color:#0f0f1a
-    style H fill:#ff5370,color:#fff
-      </pre>
+      <pre class="mermaid">flowchart TD
+A[Start] --> B{Is authenticated?}
+B -->|Yes| C[Load Dashboard]
+B -->|No| D[Show Login Page]
+D --> E[Enter Credentials]
+E --> F{Valid?}
+F -->|Yes| G[Create Session]
+G --> C
+F -->|No| H[Show Error]
+H --> D
+C --> I[End]
+classDef startNode fill:#00d2ff,color:#0f0f1a
+classDef endNode fill:#c3e88d,color:#0f0f1a
+classDef errorNode fill:#ff5370,color:#fff
+class A startNode
+class I endNode
+class H errorNode</pre>
     </div>
     <div class="card" style="flex:1">
       <h3>Authentication Flow</h3>
@@ -434,26 +435,24 @@ flowchart TD
   <h2>Sequence Diagram</h2>
   <div style="max-width:1050px;width:100%">
     <div class="card" style="padding:1.5rem 2rem">
-      <pre class="mermaid" style="font-size:14px">
-sequenceDiagram
-    participant C as Client
-    participant G as API Gateway
-    participant A as Auth Service
-    participant D as Database
-    C->>G: POST /api/login
-    G->>A: Validate credentials
-    A->>D: Query user
-    D-->>A: User record
-    A-->>G: JWT token
-    G-->>C: 200 OK + token
-    Note over C,G: Subsequent requests
-    C->>G: GET /api/data (Bearer token)
-    G->>A: Verify JWT
-    A-->>G: Valid
-    G->>D: Fetch data
-    D-->>G: Results
-    G-->>C: 200 OK + data
-      </pre>
+      <pre class="mermaid" style="font-size:14px">sequenceDiagram
+participant C as Client
+participant G as API Gateway
+participant A as Auth Service
+participant D as Database
+C->>G: POST /api/login
+G->>A: Validate credentials
+A->>D: Query user
+D-->>A: User record
+A-->>G: JWT token
+G-->>C: 200 OK + token
+Note over C,G: Subsequent requests
+C->>G: GET /api/data (Bearer token)
+G->>A: Verify JWT
+A-->>G: Valid
+G->>D: Fetch data
+D-->>G: Results
+G-->>C: 200 OK + data</pre>
     </div>
   </div>
 </div>

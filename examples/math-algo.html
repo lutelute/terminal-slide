@@ -4,8 +4,8 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0e0;overflow:hidden}
-.slide{display:none;flex-direction:column;justify-content:center;align-items:center;height:100vh;padding:3rem 4rem;position:absolute;top:0;left:0;width:100%}
-.slide.active{display:flex;animation:fadeSlide .35s cubic-bezier(.33,1,.68,1)}
+.slide{display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;padding:3rem 4rem;position:absolute;top:0;left:0;width:100%;visibility:hidden;pointer-events:none}
+.slide.active{visibility:visible;pointer-events:auto;animation:fadeSlide .35s cubic-bezier(.33,1,.68,1)}
 @keyframes fadeSlide{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 h1{font-size:2.8rem;color:#00d2ff;margin-bottom:.5rem}
 h2{font-size:2rem;color:#00d2ff;margin-bottom:1.5rem;text-align:center;width:100%}
@@ -198,54 +198,54 @@ function partition(arr, lo, hi):
 <!-- ========== Slide 8: Mermaid Flowchart ========== -->
 <div class="slide">
   <h2>Algorithm Decision Flow</h2>
-  <div class="mermaid">
-    flowchart TD
-      A[Start: Choose Algorithm] --> B{Data sorted?}
-      B -- Yes --> C{Need insertion?}
-      B -- No --> D{Data size?}
-      C -- Yes --> E[B-Tree / AVL Tree]
-      C -- No --> F[Binary Search]
-      D -- "n < 50" --> G[Insertion Sort]
-      D -- "n < 10,000" --> H[Quicksort]
-      D -- "n >= 10,000" --> I{Stability needed?}
-      I -- Yes --> J[Merge Sort]
-      I -- No --> K[Introsort]
-      style A fill:#00d2ff22,stroke:#00d2ff,color:#e0e0e0
-      style F fill:#7fdbca22,stroke:#7fdbca,color:#e0e0e0
-      style E fill:#7fdbca22,stroke:#7fdbca,color:#e0e0e0
-      style G fill:#c792ea22,stroke:#c792ea,color:#e0e0e0
-      style H fill:#f78c6c22,stroke:#f78c6c,color:#e0e0e0
-      style J fill:#ffcb6b22,stroke:#ffcb6b,color:#e0e0e0
-      style K fill:#ff537022,stroke:#ff5370,color:#e0e0e0
-  </div>
+  <div class="mermaid">flowchart TD
+A[Start: Choose Algorithm] --> B{Data sorted?}
+B -- Yes --> C{Need insertion?}
+B -- No --> D{Data size?}
+C -- Yes --> E[B-Tree / AVL Tree]
+C -- No --> F[Binary Search]
+D -- "n < 50" --> G[Insertion Sort]
+D -- "n < 10,000" --> H[Quicksort]
+D -- "n >= 10,000" --> I{Stability needed?}
+I -- Yes --> J[Merge Sort]
+I -- No --> K[Introsort]
+classDef start fill:#00d2ff22,stroke:#00d2ff,color:#e0e0e0
+classDef search fill:#7fdbca22,stroke:#7fdbca,color:#e0e0e0
+classDef purple fill:#c792ea22,stroke:#c792ea,color:#e0e0e0
+classDef orange fill:#f78c6c22,stroke:#f78c6c,color:#e0e0e0
+classDef yellow fill:#ffcb6b22,stroke:#ffcb6b,color:#e0e0e0
+classDef red fill:#ff537022,stroke:#ff5370,color:#e0e0e0
+class A start
+class E,F search
+class G purple
+class H orange
+class J yellow
+class K red</div>
 </div>
 
 <!-- ========== Slide 9: Mermaid Sequence Diagram ========== -->
 <div class="slide">
   <h2>API Call Flow</h2>
-  <div class="mermaid">
-    sequenceDiagram
-      participant C as Client
-      participant GW as API Gateway
-      participant Auth as Auth Service
-      participant DB as Database
-      participant Cache as Redis Cache
-
-      C->>GW: POST /api/query
-      GW->>Auth: Validate JWT
-      Auth-->>GW: 200 OK (user_id)
-      GW->>Cache: GET cache:query_hash
-      alt Cache Hit
-        Cache-->>GW: Cached result
-        GW-->>C: 200 OK (cached)
-      else Cache Miss
-        Cache-->>GW: null
-        GW->>DB: SELECT * FROM results
-        DB-->>GW: Result set
-        GW->>Cache: SET cache:query_hash
-        GW-->>C: 200 OK (fresh)
-      end
-  </div>
+  <div class="mermaid">sequenceDiagram
+participant C as Client
+participant GW as API Gateway
+participant Auth as Auth Service
+participant DB as Database
+participant Cache as Redis Cache
+C->>GW: POST /api/query
+GW->>Auth: Validate JWT
+Auth-->>GW: 200 OK (user_id)
+GW->>Cache: GET cache:query_hash
+alt Cache Hit
+Cache-->>GW: Cached result
+GW-->>C: 200 OK (cached)
+else Cache Miss
+Cache-->>GW: null
+GW->>DB: SELECT * FROM results
+DB-->>GW: Result set
+GW->>Cache: SET cache:query_hash
+GW-->>C: 200 OK (fresh)
+end</div>
 </div>
 
 <!-- ========== Slide 10: Summary ========== -->
