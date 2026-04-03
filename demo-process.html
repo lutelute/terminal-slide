@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Process Template Demo</title>
+</head>
+<body>
+
+<div class="slide active">
+  <div class="process-slide">
+    <h2>Git ブランチ運用フロー</h2>
+    <p style="color:#888;font-size:.9rem;margin-top:-.5rem;margin-bottom:.3rem">
+      <span class="label green">Best Practice</span> チーム開発における標準ワークフロー
+    </p>
+
+    <div class="process-row">
+      <div class="process-block flow-box">
+        <div class="process-num">1</div>
+        <h3>ブランチ作成</h3>
+        <span class="label" style="font-size:.7rem">準備フェーズ</span>
+        <p>最新の main から feature ブランチを作成し、作業スコープを明確にする</p>
+        <div class="mini-cmd">
+          <span class="prompt">$ </span><span class="cmd">git fetch origin</span><br>
+          <span class="prompt">$ </span><span class="cmd">git switch -c feature/login main</span>
+        </div>
+        <ul class="detail">
+          <li>命名規則: <code>feature/</code> <code>fix/</code> <code>docs/</code></li>
+          <li>1ブランチ = 1機能（単一責任）</li>
+          <li>作業前に <code>git pull</code> で最新化</li>
+          <li>Issue 番号を含めると追跡しやすい</li>
+          <li>長寿命ブランチは避ける（目安: 3日以内）</li>
+        </ul>
+        <div style="margin-top:.6rem;padding:.4rem .6rem;background:#ffcb6b11;border-left:2px solid #ffcb6b44;border-radius:0 4px 4px 0">
+          <span style="color:#ffcb6b;font-size:.7rem;font-weight:600">TIP</span>
+          <span style="color:#888;font-size:.72rem"> — <code>git switch -c</code> は <code>checkout -b</code> の推奨代替</span>
+        </div>
+      </div>
+
+      <div class="process-arrow">→</div>
+
+      <div class="process-block flow-box">
+        <div class="process-num">2</div>
+        <h3>コミット & プッシュ</h3>
+        <span class="label purple" style="font-size:.7rem">開発フェーズ</span>
+        <p>意味のある単位でこまめにコミットし、リモートへプッシュして共有する</p>
+        <div class="mini-cmd">
+          <span class="prompt">$ </span><span class="cmd">git add -p</span><br>
+          <span class="prompt">$ </span><span class="cmd">git commit -m "feat: add login form"</span><br>
+          <span class="prompt">$ </span><span class="cmd">git push -u origin HEAD</span>
+        </div>
+        <ul class="detail">
+          <li>Conventional Commits 形式を採用</li>
+          <li><code>feat:</code> <code>fix:</code> <code>docs:</code> <code>refactor:</code></li>
+          <li>大きな変更は論理単位で分割</li>
+          <li><code>git add -p</code> で変更を精査してから add</li>
+          <li>WIP コミットは後で <code>rebase -i</code> で整理</li>
+        </ul>
+        <div style="margin-top:.6rem;padding:.4rem .6rem;background:#ff537011;border-left:2px solid #ff537044;border-radius:0 4px 4px 0">
+          <span style="color:#ff5370;font-size:.7rem;font-weight:600">注意</span>
+          <span style="color:#888;font-size:.72rem"> — <code>.env</code> や秘密鍵は絶対にコミットしない</span>
+        </div>
+      </div>
+
+      <div class="process-arrow">→</div>
+
+      <div class="process-block flow-box">
+        <div class="process-num">3</div>
+        <h3>PR & マージ</h3>
+        <span class="label orange" style="font-size:.7rem">レビューフェーズ</span>
+        <p>Pull Request を作成しチームレビューを経て、安全に main へマージする</p>
+        <div class="mini-cmd">
+          <span class="prompt">$ </span><span class="cmd">gh pr create --fill</span><br>
+          <span class="output"># レビュー対応後...</span><br>
+          <span class="prompt">$ </span><span class="cmd">gh pr merge --squash --delete-branch</span>
+        </div>
+        <ul class="detail">
+          <li>PR テンプレートに沿って背景・変更点を記述</li>
+          <li>CI/CD パイプラインの通過を確認</li>
+          <li>最低1名の Approve を必須に設定</li>
+          <li>Squash merge でコミット履歴をクリーンに</li>
+          <li>マージ後はリモートブランチを自動削除</li>
+        </ul>
+        <div style="margin-top:.6rem;padding:.4rem .6rem;background:#7fdbca11;border-left:2px solid #7fdbca44;border-radius:0 4px 4px 0">
+          <span style="color:#7fdbca;font-size:.7rem;font-weight:600">GOAL</span>
+          <span style="color:#888;font-size:.72rem"> — main は常にデプロイ可能な状態を維持</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="process-summary">
+      <p><strong style="color:#00d2ff">小さく・こまめに・レビューを通す</strong> — feature ブランチを短命に保ち、頻繁にマージすることでコンフリクトを最小化する。大きなタスクもスライスして小さな PR に分割しよう。</p>
+    </div>
+  </div>
+</div>
+
+<div class="progress">1 / 1</div>
+<script src="terminal-slide.js"></script>
+</body>
+</html>
